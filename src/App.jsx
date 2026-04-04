@@ -14,6 +14,10 @@ import Orders               from './pages/sales/Orders'
 import PurchasingDashboard  from './pages/purchasing/PurchasingDashboard'
 import Suppliers            from './pages/purchasing/Suppliers'
 import PurchaseOrders       from './pages/purchasing/PurchaseOrders'
+import HRDashboard          from './pages/hr/HRDashboard'
+import Employees            from './pages/hr/Employees'
+import JobPositions         from './pages/hr/JobPositions'
+import Candidates           from './pages/hr/Candidates'
 
 function PrivateRoute({ children, role }) {
     const { user, loading } = useAuth()
@@ -47,6 +51,12 @@ function App() {
                 <Route path="/purchasing/dashboard" element={<PrivateRoute><PurchasingDashboard /></PrivateRoute>} />
                 <Route path="/purchasing/suppliers" element={<PrivateRoute><Suppliers /></PrivateRoute>} />
                 <Route path="/purchasing/orders"    element={<PrivateRoute><PurchaseOrders /></PrivateRoute>} />
+
+                {/* HR */}
+                <Route path="/hr/dashboard"  element={<PrivateRoute><HRDashboard /></PrivateRoute>} />
+                <Route path="/hr/employees"  element={<PrivateRoute><Employees /></PrivateRoute>} />
+                <Route path="/hr/jobs"       element={<PrivateRoute><JobPositions /></PrivateRoute>} />
+                <Route path="/hr/candidates" element={<PrivateRoute><Candidates /></PrivateRoute>} />
 
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>

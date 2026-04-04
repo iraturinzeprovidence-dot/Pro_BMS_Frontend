@@ -2,13 +2,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const adminNav = [
-    { label: 'Dashboard',  path: '/admin/dashboard',        icon: '🏠' },
-    { label: 'Inventory',  path: '/inventory/dashboard',    icon: '📦' },
-    { label: 'Sales',      path: '/sales/dashboard',        icon: '💰' },
-    { label: 'Purchasing', path: '/purchasing/dashboard',   icon: '🛒' },
-    { label: 'HR',         path: '/hr/dashboard',           icon: '👥' },
-    { label: 'Accounting', path: '/accounting/dashboard',   icon: '📊' },
-    { label: 'Analytics',  path: '/analytics/dashboard',    icon: '📈' },
+    { label: 'Dashboard',       path: '/admin/dashboard',        icon: '🏠' },
+    { label: 'Inventory',       path: '/inventory/dashboard',    icon: '📦' },
+    { label: 'Sales',           path: '/sales/dashboard',        icon: '💰' },
+    { label: 'Purchasing',      path: '/purchasing/dashboard',   icon: '🛒' },
+    { label: 'HR',              path: '/hr/dashboard',           icon: '👥' },
+    { label: 'Accounting',      path: '/accounting/dashboard',   icon: '📊' },
+    { label: 'Analytics',       path: '/analytics/dashboard',    icon: '📈' },
 ]
 
 const managerNav = [
