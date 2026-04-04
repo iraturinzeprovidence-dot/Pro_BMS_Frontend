@@ -1,13 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
-import Login               from './pages/Login'
-import AdminDashboard      from './pages/dashboards/AdminDashboard'
-import ManagerDashboard    from './pages/dashboards/ManagerDashboard'
-import EmployeeDashboard   from './pages/dashboards/EmployeeDashboard'
-import InventoryDashboard  from './pages/inventory/InventoryDashboard'
-import Products            from './pages/inventory/Products'
-import Categories          from './pages/inventory/Categories'
+import Login                from './pages/Login'
+import AdminDashboard       from './pages/dashboards/AdminDashboard'
+import ManagerDashboard     from './pages/dashboards/ManagerDashboard'
+import EmployeeDashboard    from './pages/dashboards/EmployeeDashboard'
+import InventoryDashboard   from './pages/inventory/InventoryDashboard'
+import Products             from './pages/inventory/Products'
+import Categories           from './pages/inventory/Categories'
+import SalesDashboard       from './pages/sales/SalesDashboard'
+import Customers            from './pages/sales/Customers'
+import Orders               from './pages/sales/Orders'
+import PurchasingDashboard  from './pages/purchasing/PurchasingDashboard'
+import Suppliers            from './pages/purchasing/Suppliers'
+import PurchaseOrders       from './pages/purchasing/PurchaseOrders'
 
 function PrivateRoute({ children, role }) {
     const { user, loading } = useAuth()
@@ -23,31 +29,24 @@ function App() {
             <Routes>
                 <Route path="/login" element={<Login />} />
 
-                {/* Admin */}
-                <Route path="/admin/dashboard" element={
-                    <PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>
-                } />
-
-                {/* Manager */}
-                <Route path="/manager/dashboard" element={
-                    <PrivateRoute role="manager"><ManagerDashboard /></PrivateRoute>
-                } />
-
-                {/* Employee */}
-                <Route path="/employee/dashboard" element={
-                    <PrivateRoute role="employee"><EmployeeDashboard /></PrivateRoute>
-                } />
+                <Route path="/admin/dashboard"    element={<PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>} />
+                <Route path="/manager/dashboard"  element={<PrivateRoute role="manager"><ManagerDashboard /></PrivateRoute>} />
+                <Route path="/employee/dashboard" element={<PrivateRoute role="employee"><EmployeeDashboard /></PrivateRoute>} />
 
                 {/* Inventory */}
-                <Route path="/inventory/dashboard" element={
-                    <PrivateRoute><InventoryDashboard /></PrivateRoute>
-                } />
-                <Route path="/inventory/products" element={
-                    <PrivateRoute><Products /></PrivateRoute>
-                } />
-                <Route path="/inventory/categories" element={
-                    <PrivateRoute><Categories /></PrivateRoute>
-                } />
+                <Route path="/inventory/dashboard"  element={<PrivateRoute><InventoryDashboard /></PrivateRoute>} />
+                <Route path="/inventory/products"   element={<PrivateRoute><Products /></PrivateRoute>} />
+                <Route path="/inventory/categories" element={<PrivateRoute><Categories /></PrivateRoute>} />
+
+                {/* Sales */}
+                <Route path="/sales/dashboard" element={<PrivateRoute><SalesDashboard /></PrivateRoute>} />
+                <Route path="/sales/customers" element={<PrivateRoute><Customers /></PrivateRoute>} />
+                <Route path="/sales/orders"    element={<PrivateRoute><Orders /></PrivateRoute>} />
+
+                {/* Purchasing */}
+                <Route path="/purchasing/dashboard" element={<PrivateRoute><PurchasingDashboard /></PrivateRoute>} />
+                <Route path="/purchasing/suppliers" element={<PrivateRoute><Suppliers /></PrivateRoute>} />
+                <Route path="/purchasing/orders"    element={<PrivateRoute><PurchaseOrders /></PrivateRoute>} />
 
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
