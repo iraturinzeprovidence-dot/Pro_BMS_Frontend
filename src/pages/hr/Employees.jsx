@@ -3,6 +3,7 @@ import { hrApi } from '../../api/hrApi'
 import { pdfApi, downloadPdf } from '../../api/pdfApi'
 
 export default function Employees() {
+    const [pdfLoading, setPdfLoading] = useState(false)
     const [employees, setEmployees] = useState([])
     const [search, setSearch]       = useState('')
     const [loading, setLoading]     = useState(true)
@@ -43,6 +44,17 @@ export default function Employees() {
         setError('')
         setShowModal(true)
     }
+    const handleExportPdf = async () => {
+    setPdfLoading(true)
+    try {
+        const r = await pdfApi.exportEmployees()
+        downloadPdf(r.data, 'employees-report.pdf')
+    } catch (err) {
+        alert('Failed to export PDF. Please try again.')
+    } finally {
+        setPdfLoading(false)
+    }
+}
 
     const handleSubmit = async (ev) => {
         ev.preventDefault()
@@ -65,11 +77,6 @@ export default function Employees() {
         await hrApi.deleteEmployee(id)
         fetchEmployees()
     }
-    const handleExportPdf = async () => {
-    const r = await pdfApi.exportEmployees()
-    downloadPdf(r.data, 'employees-report.pdf')
-}
-
     const statusColor = (s) => ({
         active:     'bg-green-100 text-green-700',
         inactive:   'bg-gray-100 text-gray-600',
@@ -83,15 +90,21 @@ export default function Employees() {
                     <h2 className="text-2xl font-bold text-gray-800">Employees</h2>
                     <p className="text-gray-500 text-sm mt-1">{employees.length} employees</p>
                 </div>
-                <button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
-                    + Add Employee
-                </button>
-                <button
-    onClick={handleExportPdf}
-    className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
->
-    Export PDF
-</button>
+<div className="flex gap-3">
+    <button
+        onClick={handleExportPdf}
+        disabled={pdfLoading}
+        className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-50"
+    >
+        {pdfLoading ? 'Generating...' : 'Export PDF'}
+    </button>
+    <button
+        onClick={openCreate}
+        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+    >
+        + Add Employee
+    </button>
+</div>
             </div>
 
             <div className="mb-6">

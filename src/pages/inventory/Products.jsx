@@ -22,17 +22,27 @@ export default function Products() {
         setLoading(false)
     }
 
-    useEffect(() => {
-        inventoryApi.getCategories().then(r => setCategories(r.data))
-    }, [])
+    const fetchCategories = async () => {
+        const r = await inventoryApi.getCategories()
+        setCategories(r.data)
+    }
 
-    useEffect(() => {
-        fetchProducts()
-    }, [search])
+    useEffect(() => { fetchCategories() }, [])
+    useEffect(() => { fetchProducts() }, [search])
+
+    const generateSku = (name) => {
+        const prefix = name.substring(0, 3).toUpperCase().replace(/\s/g, '')
+        const rand   = Math.floor(1000 + Math.random() * 9000)
+        return `${prefix}-${rand}`
+    }
 
     const openCreate = () => {
         setEditing(null)
-        setForm({ name: '', sku: '', description: '', price: '', cost: '', stock: '', stock_alert: '10', category_id: '', status: 'active' })
+        setForm({
+            name: '', sku: '', description: '', price: '',
+            cost: '', stock: '', stock_alert: '10',
+            category_id: '', status: 'active',
+        })
         setError('')
         setShowModal(true)
     }
@@ -78,7 +88,6 @@ export default function Products() {
 
     return (
         <div className="p-8">
-            {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Products</h2>
@@ -92,7 +101,6 @@ export default function Products() {
                 </button>
             </div>
 
-            {/* Search */}
             <div className="mb-6">
                 <input
                     type="text"
@@ -103,7 +111,6 @@ export default function Products() {
                 />
             </div>
 
-            {/* Table */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50">
@@ -125,16 +132,36 @@ export default function Products() {
                         ) : products.map((p) => (
                             <tr key={p.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-3 font-medium text-gray-800">{p.name}</td>
-                                <td className="px-6 py-3 text-gray-500">{p.sku}</td>
-                                <td className="px-6 py-3 text-gray-500">{p.category?.name ?? '—'}</td>
+                                <td className="px-6 py-3">
+                                    <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-mono">
+                                        {p.sku}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-3">
+                                    {p.category ? (
+                                        <span className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                                            {p.category.name}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400 text-xs">No category</span>
+                                    )}
+                                </td>
                                 <td className="px-6 py-3 text-gray-800">${Number(p.price).toFixed(2)}</td>
                                 <td className="px-6 py-3">
-                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.stock <= p.stock_alert ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                        p.stock <= p.stock_alert
+                                            ? 'bg-red-100 text-red-700'
+                                            : 'bg-green-100 text-green-700'
+                                    }`}>
                                         {p.stock}
                                     </span>
                                 </td>
                                 <td className="px-6 py-3">
-                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                        p.status === 'active'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-gray-100 text-gray-600'
+                                    }`}>
                                         {p.status}
                                     </span>
                                 </td>
@@ -148,10 +175,9 @@ export default function Products() {
                 </table>
             </div>
 
-            {/* Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8 max-h-screen overflow-y-auto">
                         <h3 className="text-lg font-bold text-gray-800 mb-6">
                             {editing ? 'Edit Product' : 'Add New Product'}
                         </h3>
@@ -162,48 +188,93 @@ export default function Products() {
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                    <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                                    <input
+                                        type="text" required value={form.name}
+                                        onChange={e => {
+                                            const name = e.target.value
+                                            setForm({
+                                                ...form,
+                                                name,
+                                                sku: !editing && !form.sku ? generateSku(name) : form.sku
+                                            })
+                                        }}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        SKU
+                                        {!editing && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setForm({...form, sku: generateSku(form.name || 'PRD')})}
+                                                className="ml-2 text-xs text-blue-600 hover:underline"
+                                            >
+                                                Auto-generate
+                                            </button>
+                                        )}
+                                    </label>
+                                    <input
+                                        type="text" required value={form.sku}
+                                        onChange={e => setForm({...form, sku: e.target.value})}
+                                        placeholder="e.g. PRD-1234"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                                    <input type="text" required value={form.sku} onChange={e => setForm({...form, sku: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                                    <input
+                                        type="number" required min="0" step="0.01" value={form.price}
+                                        onChange={e => setForm({...form, price: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                                    <input type="number" required min="0" step="0.01" value={form.price} onChange={e => setForm({...form, price: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Cost</label>
-                                    <input type="number" required min="0" step="0.01" value={form.cost} onChange={e => setForm({...form, cost: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Cost ($)</label>
+                                    <input
+                                        type="number" required min="0" step="0.01" value={form.cost}
+                                        onChange={e => setForm({...form, cost: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                                    <input type="number" required min="0" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <input
+                                        type="number" required min="0" value={form.stock}
+                                        onChange={e => setForm({...form, stock: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Stock Alert</label>
-                                    <input type="number" required min="0" value={form.stock_alert} onChange={e => setForm({...form, stock_alert: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <input
+                                        type="number" required min="0" value={form.stock_alert}
+                                        onChange={e => setForm({...form, stock_alert: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                    <select value={form.category_id} onChange={e => setForm({...form, category_id: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select
+                                        value={form.category_id}
+                                        onChange={e => setForm({...form, category_id: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
                                         <option value="">No Category</option>
-                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        {categories.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                    <select value={form.status} onChange={e => setForm({...form, status: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select
+                                        value={form.status}
+                                        onChange={e => setForm({...form, status: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
                                     </select>
@@ -211,8 +282,11 @@ export default function Products() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                <textarea rows="2" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <textarea
+                                    rows="2" value={form.description}
+                                    onChange={e => setForm({...form, description: e.target.value})}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
                             </div>
                             <div className="flex gap-3 pt-2">
                                 <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm">

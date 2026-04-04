@@ -4,18 +4,30 @@ import { inventoryApi } from '../../api/inventoryApi'
 import { pdfApi, downloadPdf } from '../../api/pdfApi'
 
 export default function Orders() {
-    const handleExportOrder = async (id, orderNumber) => {
-    const r = await pdfApi.exportOrder(id)
-    downloadPdf(r.data, `order-${orderNumber}.pdf`)
-}
+    const [currency, setCurrency] = useState('USD')
+
+const currencies = [
+    { code: 'USD', symbol: '$', name: 'US Dollar' },
+    { code: 'EUR', symbol: '€', name: 'Euro' },
+    { code: 'GBP', symbol: '£', name: 'British Pound' },
+    { code: 'RWF', symbol: 'RWF', name: 'Rwandan Franc' },
+    { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
+    { code: 'UGX', symbol: 'USh', name: 'Ugandan Shilling' },
+    { code: 'TZS', symbol: 'TSh', name: 'Tanzanian Shilling' },
+    { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
+    { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+]
+
+const currencySymbol = currencies.find(c => c.code === currency)?.symbol ?? '$'
+
     const [orders, setOrders]       = useState([])
     const [customers, setCustomers] = useState([])
     const [products, setProducts]   = useState([])
     const [search, setSearch]       = useState('')
     const [loading, setLoading]     = useState(true)
     const [showModal, setShowModal] = useState(false)
-    const [viewing, setViewing]     = useState(null)
     const [error, setError]         = useState('')
+    const [pdfLoading, setPdfLoading] = useState(null)
     const [form, setForm]           = useState({
         customer_id: '', payment_method: 'cash',
         payment_status: 'unpaid', tax: '0', discount: '0', notes: '',
@@ -28,6 +40,14 @@ export default function Orders() {
         setOrders(r.data)
         setLoading(false)
     }
+    useEffect(() => {
+    salesApi.getCustomers({}).then(r => {
+        setCustomers(r.data)
+    }).catch(err => {
+        console.error('Failed to load customers:', err)
+    })
+    inventoryApi.getProducts({}).then(r => setProducts(r.data))
+}, [])
 
     useEffect(() => {
         salesApi.getCustomers({}).then(r => setCustomers(r.data))
@@ -64,13 +84,8 @@ export default function Orders() {
         setForm({ ...form, items })
     }
 
-    const getSubtotal = () => {
-        return form.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)
-    }
-
-    const getTotal = () => {
-        return getSubtotal() + Number(form.tax) - Number(form.discount)
-    }
+    const getSubtotal = () => form.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)
+    const getTotal    = () => getSubtotal() + Number(form.tax) - Number(form.discount)
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -93,6 +108,18 @@ export default function Orders() {
         if (!window.confirm('Delete this order?')) return
         await salesApi.deleteOrder(id)
         fetchOrders()
+    }
+
+    const handleExportPdf = async (id, orderNumber) => {
+        setPdfLoading(id)
+        try {
+            const r = await pdfApi.exportOrder(id)
+            downloadPdf(r.data, `order-${orderNumber}.pdf`)
+        } catch (err) {
+            alert('Failed to export PDF. Please try again.')
+        } finally {
+            setPdfLoading(null)
+        }
     }
 
     const statusColor = (s) => ({
@@ -152,7 +179,7 @@ export default function Orders() {
                             <tr key={o.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-3 font-medium text-gray-800">{o.order_number}</td>
                                 <td className="px-6 py-3 text-gray-500">{o.customer?.name ?? 'Walk-in'}</td>
-                                <td className="px-6 py-3 font-medium text-gray-800">${Number(o.total).toFixed(2)}</td>
+                                <td className="px-6 py-3 font-medium text-gray-800">{Number(o.total).toFixed(2)}</td>
                                 <td className="px-6 py-3">
                                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColor(o.status)}`}>
                                         {o.status}
@@ -164,30 +191,45 @@ export default function Orders() {
                                     </span>
                                 </td>
                                 <td className="px-6 py-3 text-gray-500">{new Date(o.created_at).toLocaleDateString()}</td>
-                                <td className="px-6 py-3 flex gap-2">
-                                    <button
-                                        onClick={() => handleUpdateStatus(o.id, 'completed', 'paid')}
-                                        className="text-green-600 hover:underline text-xs"
-                                    >
-                                        Complete
-                                    </button>
-                                    <button onClick={() => handleDelete(o.id)} className="text-red-500 hover:underline text-xs">Delete</button>
+                                <td className="px-6 py-3">
+                                    <div className="flex gap-2">
+                                        {o.status !== 'completed' && (
+                                            <button
+                                                onClick={() => handleUpdateStatus(o.id, 'completed', 'paid')}
+                                                className="text-green-600 hover:underline text-xs"
+                                            >
+                                                Complete
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleExportPdf(o.id, o.order_number)}
+                                            disabled={pdfLoading === o.id}
+                                            className="text-purple-600 hover:underline text-xs disabled:opacity-50"
+                                        >
+                                            {pdfLoading === o.id ? 'Generating...' : 'PDF'}
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(o.id)}
+                                            className="text-red-500 hover:underline text-xs"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </td>
-                                <button onClick={() => handleExportOrder(o.id, o.order_number)}
-                                  className="text-purple-600 hover:underline text-xs">PDF </button>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            {/* Create Order Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 max-h-screen overflow-y-auto">
                         <h3 className="text-lg font-bold text-gray-800 mb-6">Create New Order</h3>
 
-                        {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>}
+                        {error && (
+                            <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
+                        )}
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
@@ -218,19 +260,21 @@ export default function Orders() {
                                         <option value="partial">Partial</option>
                                     </select>
                                 </div>
+                                  
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tax ($)</label>
-                                    <input type="number" min="0" step="0.01" value={form.tax} onChange={e => setForm({...form, tax: e.target.value})}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tax  </label>
+                                    <input type="number" min="0" step="0.01" value={form.tax}
+                                        onChange={e => setForm({...form, tax: e.target.value})}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Discount ($)</label>
-                                    <input type="number" min="0" step="0.01" value={form.discount} onChange={e => setForm({...form, discount: e.target.value})}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Discount  </label>
+                                    <input type="number" min="0" step="0.01" value={form.discount}
+                                        onChange={e => setForm({...form, discount: e.target.value})}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                             </div>
 
-                            {/* Order Items */}
                             <div>
                                 <div className="flex justify-between items-center mb-2">
                                     <label className="text-sm font-medium text-gray-700">Order Items</label>
@@ -242,17 +286,22 @@ export default function Orders() {
                                             <select value={item.product_id} onChange={e => updateItem(index, 'product_id', e.target.value)}
                                                 className="col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                 <option value="">Select Product</option>
-                                                {products.map(p => <option key={p.id} value={p.id}>{p.name} (${Number(p.price).toFixed(2)})</option>)}
+                                                {products.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name} (${Number(p.price).toFixed(2)})</option>
+                                                ))}
                                             </select>
-                                            <input type="number" min="1" value={item.quantity} onChange={e => updateItem(index, 'quantity', e.target.value)}
+                                            <input type="number" min="1" value={item.quantity}
+                                                onChange={e => updateItem(index, 'quantity', e.target.value)}
                                                 placeholder="Qty"
                                                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                             <div className="flex gap-1 items-center">
-                                                <input type="number" min="0" step="0.01" value={item.unit_price} onChange={e => updateItem(index, 'unit_price', e.target.value)}
+                                                <input type="number" min="0" step="0.01" value={item.unit_price}
+                                                    onChange={e => updateItem(index, 'unit_price', e.target.value)}
                                                     placeholder="Price"
                                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                                 {form.items.length > 1 && (
-                                                    <button type="button" onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600 text-lg font-bold">×</button>
+                                                    <button type="button" onClick={() => removeItem(index)}
+                                                        className="text-red-400 hover:text-red-600 text-lg font-bold">×</button>
                                                 )}
                                             </div>
                                         </div>
@@ -260,29 +309,25 @@ export default function Orders() {
                                 </div>
                             </div>
 
-                            {/* Totals */}
                             <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
                                 <div className="flex justify-between text-gray-600">
-                                    <span>Subtotal</span>
-                                    <span>${getSubtotal().toFixed(2)}</span>
+                                    <span>Subtotal</span><span>{getSubtotal().toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
-                                    <span>Tax</span>
-                                    <span>${Number(form.tax).toFixed(2)}</span>
+                                    <span>Tax</span><span>{Number(form.tax).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
-                                    <span>Discount</span>
-                                    <span>-${Number(form.discount).toFixed(2)}</span>
+                                    <span>Discount</span><span>-{Number(form.discount).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between font-bold text-gray-800 border-t border-gray-200 pt-1 mt-1">
-                                    <span>Total</span>
-                                    <span>${getTotal().toFixed(2)}</span>
+                                    <span>Total</span><span>{getTotal().toFixed(2)}</span>
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                                <textarea rows="2" value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
+                                <textarea rows="2" value={form.notes}
+                                    onChange={e => setForm({...form, notes: e.target.value})}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
 
@@ -290,7 +335,8 @@ export default function Orders() {
                                 <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm">
                                     Create Order
                                 </button>
-                                <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50">
+                                <button type="button" onClick={() => setShowModal(false)}
+                                    className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50">
                                     Cancel
                                 </button>
                             </div>

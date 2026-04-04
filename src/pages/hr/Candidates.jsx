@@ -62,17 +62,17 @@ export default function Candidates() {
         setShowHireModal(true)
     }
 
-    const handleHire = async (e) => {
-        e.preventDefault()
-        setError('')
-        try {
-            await hrApi.hireCandidate(selected.id, hireForm)
-            setShowHireModal(false)
-            fetchCandidates()
-        } catch (err) {
-            setError(err.response?.data?.message ?? 'Something went wrong')
-        }
+const handleHire = async (e) => {
+    e.preventDefault()
+    setError('')
+    try {
+        await hrApi.hireCandidate(selected.id, hireForm)
+        setShowHireModal(false)
+        fetchCandidates()
+    } catch (err) {
+        setError(err.response?.data?.message ?? 'Something went wrong')
     }
+}
 
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this candidate?')) return

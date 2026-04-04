@@ -3,10 +3,6 @@ import { accountingApi } from '../../api/accountingApi'
 import { pdfApi, downloadPdf } from '../../api/pdfApi'
 
 export default function Transactions() {
-    const handleExportPdf = async () => {
-    const r = await pdfApi.exportTransactions({})
-    downloadPdf(r.data, 'transactions-report.pdf')
-}
     const [transactions, setTransactions] = useState([])
     const [search, setSearch]             = useState('')
     const [typeFilter, setTypeFilter]     = useState('')
@@ -14,6 +10,7 @@ export default function Transactions() {
     const [showModal, setShowModal]       = useState(false)
     const [editing, setEditing]           = useState(null)
     const [error, setError]               = useState('')
+    const [pdfLoading, setPdfLoading]     = useState(false)
     const [form, setForm]                 = useState({
         type: 'income', category: '', amount: '',
         description: '', date: '', payment_method: 'cash',
@@ -30,7 +27,10 @@ export default function Transactions() {
 
     const openCreate = () => {
         setEditing(null)
-        setForm({ type: 'income', category: '', amount: '', description: '', date: new Date().toISOString().split('T')[0], payment_method: 'cash' })
+        setForm({
+            type: 'income', category: '', amount: '',
+            description: '', date: new Date().toISOString().split('T')[0], payment_method: 'cash',
+        })
         setError('')
         setShowModal(true)
     }
@@ -67,6 +67,18 @@ export default function Transactions() {
         fetchTransactions()
     }
 
+    const handleExportPdf = async () => {
+        setPdfLoading(true)
+        try {
+            const r = await pdfApi.exportTransactions({})
+            downloadPdf(r.data, 'transactions-report.pdf')
+        } catch (err) {
+            alert('Failed to export PDF. Please try again.')
+        } finally {
+            setPdfLoading(false)
+        }
+    }
+
     const totalIncome  = transactions.filter(t => t.type === 'income').reduce((s, t)  => s + Number(t.amount), 0)
     const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
 
@@ -77,18 +89,23 @@ export default function Transactions() {
                     <h2 className="text-2xl font-bold text-gray-800">Transactions</h2>
                     <p className="text-gray-500 text-sm mt-1">{transactions.length} transactions</p>
                 </div>
-                <button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
-                    + Add Transaction
-                </button>
-                <button
-    onClick={handleExportPdf}
-    className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
->
-    Export PDF
-</button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleExportPdf}
+                        disabled={pdfLoading}
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-50"
+                    >
+                        {pdfLoading ? 'Generating...' : 'Export PDF'}
+                    </button>
+                    <button
+                        onClick={openCreate}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+                    >
+                        + Add Transaction
+                    </button>
+                </div>
             </div>
 
-            {/* Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="bg-green-50 rounded-xl border border-green-100 p-4">
                     <p className="text-sm text-green-600">Total Income</p>
@@ -106,7 +123,6 @@ export default function Transactions() {
                 </div>
             </div>
 
-            {/* Filters */}
             <div className="flex gap-4 mb-6">
                 <input
                     type="text"
@@ -187,18 +203,21 @@ export default function Transactions() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                    <input type="text" required value={form.category} onChange={e => setForm({...form, category: e.target.value})}
+                                    <input type="text" required value={form.category}
+                                        onChange={e => setForm({...form, category: e.target.value})}
                                         placeholder="e.g. Sales, Rent, Salary"
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-                                    <input type="number" required min="0" step="0.01" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})}
+                                    <input type="number" required min="0" step="0.01" value={form.amount}
+                                        onChange={e => setForm({...form, amount: e.target.value})}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                                    <input type="date" required value={form.date} onChange={e => setForm({...form, date: e.target.value})}
+                                    <input type="date" required value={form.date}
+                                        onChange={e => setForm({...form, date: e.target.value})}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                                 <div className="col-span-2">
@@ -214,14 +233,16 @@ export default function Transactions() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                <textarea rows="2" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+                                <textarea rows="2" value={form.description}
+                                    onChange={e => setForm({...form, description: e.target.value})}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
                             <div className="flex gap-3 pt-2">
                                 <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm">
                                     {editing ? 'Update Transaction' : 'Add Transaction'}
                                 </button>
-                                <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50">
+                                <button type="button" onClick={() => setShowModal(false)}
+                                    className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50">
                                     Cancel
                                 </button>
                             </div>
