@@ -20,6 +20,7 @@ import JobPositions         from './pages/hr/JobPositions'
 import Candidates           from './pages/hr/Candidates'
 import AccountingDashboard  from './pages/accounting/AccountingDashboard'
 import Transactions         from './pages/accounting/Transactions'
+import AnalyticsDashboard   from './pages/analytics/AnalyticsDashboard'
 
 function PrivateRoute({ children, role }) {
     const { user, loading } = useAuth()
@@ -63,6 +64,9 @@ function App() {
                 {/* Accounting */}
                 <Route path="/accounting/dashboard"    element={<PrivateRoute><AccountingDashboard /></PrivateRoute>} />
                 <Route path="/accounting/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
+
+                {/* Analytics */}
+                <Route path="/analytics/dashboard" element={<PrivateRoute><AnalyticsDashboard /></PrivateRoute>} />
 
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
