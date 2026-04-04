@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
 import { accountingApi } from '../../api/accountingApi'
+import { pdfApi, downloadPdf } from '../../api/pdfApi'
 
 export default function Transactions() {
+    const handleExportPdf = async () => {
+    const r = await pdfApi.exportTransactions({})
+    downloadPdf(r.data, 'transactions-report.pdf')
+}
     const [transactions, setTransactions] = useState([])
     const [search, setSearch]             = useState('')
     const [typeFilter, setTypeFilter]     = useState('')
@@ -75,6 +80,12 @@ export default function Transactions() {
                 <button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
                     + Add Transaction
                 </button>
+                <button
+    onClick={handleExportPdf}
+    className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+>
+    Export PDF
+</button>
             </div>
 
             {/* Summary */}

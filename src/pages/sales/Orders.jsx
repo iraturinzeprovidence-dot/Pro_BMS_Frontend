@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
 import { salesApi } from '../../api/salesApi'
 import { inventoryApi } from '../../api/inventoryApi'
+import { pdfApi, downloadPdf } from '../../api/pdfApi'
 
 export default function Orders() {
+    const handleExportOrder = async (id, orderNumber) => {
+    const r = await pdfApi.exportOrder(id)
+    downloadPdf(r.data, `order-${orderNumber}.pdf`)
+}
     const [orders, setOrders]       = useState([])
     const [customers, setCustomers] = useState([])
     const [products, setProducts]   = useState([])
@@ -168,6 +173,8 @@ export default function Orders() {
                                     </button>
                                     <button onClick={() => handleDelete(o.id)} className="text-red-500 hover:underline text-xs">Delete</button>
                                 </td>
+                                <button onClick={() => handleExportOrder(o.id, o.order_number)}
+                                  className="text-purple-600 hover:underline text-xs">PDF </button>
                             </tr>
                         ))}
                     </tbody>

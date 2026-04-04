@@ -9,6 +9,7 @@ const adminNav = [
     { label: 'HR',              path: '/hr/dashboard',           icon: '👥' },
     { label: 'Accounting',      path: '/accounting/dashboard',   icon: '📊' },
     { label: 'Analytics',       path: '/analytics/dashboard',    icon: '📈' },
+    { label: 'Users',           path: '/admin/users',            icon: '🔐' },
 ]
 
 const managerNav = [

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { hrApi } from '../../api/hrApi'
+import { pdfApi, downloadPdf } from '../../api/pdfApi'
 
 export default function Employees() {
     const [employees, setEmployees] = useState([])
@@ -64,6 +65,10 @@ export default function Employees() {
         await hrApi.deleteEmployee(id)
         fetchEmployees()
     }
+    const handleExportPdf = async () => {
+    const r = await pdfApi.exportEmployees()
+    downloadPdf(r.data, 'employees-report.pdf')
+}
 
     const statusColor = (s) => ({
         active:     'bg-green-100 text-green-700',
@@ -81,6 +86,12 @@ export default function Employees() {
                 <button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
                     + Add Employee
                 </button>
+                <button
+    onClick={handleExportPdf}
+    className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+>
+    Export PDF
+</button>
             </div>
 
             <div className="mb-6">
