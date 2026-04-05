@@ -22,12 +22,23 @@ import AccountingDashboard  from './pages/accounting/AccountingDashboard'
 import Transactions         from './pages/accounting/Transactions'
 import AnalyticsDashboard   from './pages/analytics/AnalyticsDashboard'
 import UserManagement from './pages/admin/UserManagement'
+import JobApplication    from './pages/public/JobApplication'
+import CustomerRegister  from './pages/public/CustomerRegister'
 
-function PrivateRoute({ children, role }) {
+function PrivateRoute({ children, role, permission }) {
     const { user, loading } = useAuth()
-    if (loading) return <div className="flex items-center justify-center h-screen text-gray-400">Loading...</div>
+
+    if (loading) return (
+        <div className="flex items-center justify-center h-screen text-gray-400">
+            Loading...
+        </div>
+    )
+
     if (!user) return <Navigate to="/login" />
+
+    // Role-based check
     if (role && user.role !== role) return <Navigate to="/login" />
+
     return <Layout>{children}</Layout>
 }
 
@@ -55,6 +66,9 @@ function App() {
                 <Route path="/purchasing/dashboard" element={<PrivateRoute><PurchasingDashboard /></PrivateRoute>} />
                 <Route path="/purchasing/suppliers" element={<PrivateRoute><Suppliers /></PrivateRoute>} />
                 <Route path="/purchasing/orders"    element={<PrivateRoute><PurchaseOrders /></PrivateRoute>} />
+                {/* Public pages — no login required */}
+<Route path="/careers"  element={<JobApplication />} />
+<Route path="/register" element={<CustomerRegister />} />
 
                 {/* HR */}
                 <Route path="/hr/dashboard"  element={<PrivateRoute><HRDashboard /></PrivateRoute>} />
