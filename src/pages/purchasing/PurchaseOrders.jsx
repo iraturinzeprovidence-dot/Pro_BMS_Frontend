@@ -3,14 +3,15 @@ import { purchasingApi } from '../../api/purchasingApi'
 import { inventoryApi } from '../../api/inventoryApi'
 
 export default function PurchaseOrders() {
-    const [orders, setOrders]       = useState([])
-    const [suppliers, setSuppliers] = useState([])
-    const [products, setProducts]   = useState([])
-    const [search, setSearch]       = useState('')
-    const [loading, setLoading]     = useState(true)
-    const [showModal, setShowModal] = useState(false)
-    const [error, setError]         = useState('')
-    const [form, setForm]           = useState({
+    const [orders, setOrders]         = useState([])
+    const [suppliers, setSuppliers]   = useState([])
+    const [products, setProducts]     = useState([])
+    const [search, setSearch]         = useState('')
+    const [loading, setLoading]       = useState(true)
+    const [showModal, setShowModal]   = useState(false)
+    const [error, setError]           = useState('')
+    const [receiving, setReceiving]   = useState(null)
+    const [form, setForm]             = useState({
         supplier_id: '', payment_status: 'unpaid',
         tax: '0', expected_date: '', notes: '',
         items: [{ product_id: '', quantity: 1, unit_cost: 0 }],
@@ -73,9 +74,19 @@ export default function PurchaseOrders() {
         }
     }
 
-    const handleReceive = async (id, payment_status) => {
-        await purchasingApi.updateOrder(id, { status: 'received', payment_status })
-        fetchOrders()
+    const handleReceive = async (order) => {
+        setReceiving(order.id)
+        try {
+            await purchasingApi.updateOrder(order.id, {
+                status:         'received',
+                payment_status: order.payment_status,
+            })
+            fetchOrders()
+        } catch (err) {
+            alert(err.response?.data?.message ?? 'Failed to receive order')
+        } finally {
+            setReceiving(null)
+        }
     }
 
     const handleDelete = async (id) => {
@@ -104,7 +115,10 @@ export default function PurchaseOrders() {
                     <h2 className="text-2xl font-bold text-gray-800">Purchase Orders</h2>
                     <p className="text-gray-500 text-sm mt-1">{orders.length} orders</p>
                 </div>
-                <button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+                <button
+                    onClick={openCreate}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+                >
                     + New Purchase Order
                 </button>
             </div>
@@ -152,17 +166,30 @@ export default function PurchaseOrders() {
                                         {o.payment_status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-3 text-gray-500">{new Date(o.created_at).toLocaleDateString()}</td>
-                                <td className="px-6 py-3 flex gap-2">
-                                    {o.status !== 'received' && (
+                                <td className="px-6 py-3 text-gray-500">
+                                    {new Date(o.created_at).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-3">
+                                    <div className="flex gap-2">
+                                        {o.status !== 'received' && o.status !== 'cancelled' && (
+                                            <button
+                                                onClick={() => handleReceive(o)}
+                                                disabled={receiving === o.id}
+                                                className="text-green-600 hover:underline text-xs font-medium disabled:opacity-50"
+                                            >
+                                                {receiving === o.id ? 'Receiving...' : 'Receive'}
+                                            </button>
+                                        )}
+                                        {o.status === 'received' && (
+                                            <span className="text-green-600 text-xs font-medium">✅ Received</span>
+                                        )}
                                         <button
-                                            onClick={() => handleReceive(o.id, o.payment_status)}
-                                            className="text-green-600 hover:underline text-xs"
+                                            onClick={() => handleDelete(o.id)}
+                                            className="text-red-500 hover:underline text-xs"
                                         >
-                                            Receive
+                                            Delete
                                         </button>
-                                    )}
-                                    <button onClick={() => handleDelete(o.id)} className="text-red-500 hover:underline text-xs">Delete</button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -170,25 +197,38 @@ export default function PurchaseOrders() {
                 </table>
             </div>
 
+            {/* Create Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 max-h-screen overflow-y-auto">
                         <h3 className="text-lg font-bold text-gray-800 mb-6">Create Purchase Order</h3>
-                        {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>}
+
+                        {error && (
+                            <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
+                        )}
+
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Supplier</label>
-                                    <select value={form.supplier_id} onChange={e => setForm({...form, supplier_id: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select
+                                        value={form.supplier_id}
+                                        onChange={e => setForm({...form, supplier_id: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
                                         <option value="">No Supplier</option>
-                                        {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                        {suppliers.map(s => (
+                                            <option key={s.id} value={s.id}>{s.name}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
-                                    <select value={form.payment_status} onChange={e => setForm({...form, payment_status: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select
+                                        value={form.payment_status}
+                                        onChange={e => setForm({...form, payment_status: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
                                         <option value="unpaid">Unpaid</option>
                                         <option value="paid">Paid</option>
                                         <option value="partial">Partial</option>
@@ -196,38 +236,65 @@ export default function PurchaseOrders() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Tax ($)</label>
-                                    <input type="number" min="0" step="0.01" value={form.tax} onChange={e => setForm({...form, tax: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <input
+                                        type="number" min="0" step="0.01" value={form.tax}
+                                        onChange={e => setForm({...form, tax: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Expected Date</label>
-                                    <input type="date" value={form.expected_date} onChange={e => setForm({...form, expected_date: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    <input
+                                        type="date" value={form.expected_date}
+                                        onChange={e => setForm({...form, expected_date: e.target.value})}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                             </div>
 
                             <div>
                                 <div className="flex justify-between items-center mb-2">
                                     <label className="text-sm font-medium text-gray-700">Order Items</label>
-                                    <button type="button" onClick={addItem} className="text-blue-600 text-xs hover:underline">+ Add Item</button>
+                                    <button
+                                        type="button" onClick={addItem}
+                                        className="text-blue-600 text-xs hover:underline"
+                                    >
+                                        + Add Item
+                                    </button>
                                 </div>
                                 <div className="space-y-2">
                                     {form.items.map((item, index) => (
                                         <div key={index} className="grid grid-cols-4 gap-2 items-center">
-                                            <select value={item.product_id} onChange={e => updateItem(index, 'product_id', e.target.value)}
-                                                className="col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <select
+                                                value={item.product_id}
+                                                onChange={e => updateItem(index, 'product_id', e.target.value)}
+                                                className="col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
                                                 <option value="">Select Product</option>
-                                                {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                                {products.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                                ))}
                                             </select>
-                                            <input type="number" min="1" value={item.quantity} onChange={e => updateItem(index, 'quantity', e.target.value)}
+                                            <input
+                                                type="number" min="1" value={item.quantity}
+                                                onChange={e => updateItem(index, 'quantity', e.target.value)}
                                                 placeholder="Qty"
-                                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
                                             <div className="flex gap-1 items-center">
-                                                <input type="number" min="0" step="0.01" value={item.unit_cost} onChange={e => updateItem(index, 'unit_cost', e.target.value)}
+                                                <input
+                                                    type="number" min="0" step="0.01" value={item.unit_cost}
+                                                    onChange={e => updateItem(index, 'unit_cost', e.target.value)}
                                                     placeholder="Cost"
-                                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
                                                 {form.items.length > 1 && (
-                                                    <button type="button" onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600 text-lg font-bold">×</button>
+                                                    <button
+                                                        type="button" onClick={() => removeItem(index)}
+                                                        className="text-red-400 hover:text-red-600 text-lg font-bold"
+                                                    >
+                                                        ×
+                                                    </button>
                                                 )}
                                             </div>
                                         </div>
@@ -249,15 +316,24 @@ export default function PurchaseOrders() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                                <textarea rows="2" value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <textarea
+                                    rows="2" value={form.notes}
+                                    onChange={e => setForm({...form, notes: e.target.value})}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
                             </div>
 
                             <div className="flex gap-3 pt-2">
-                                <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm">
+                                <button
+                                    type="submit"
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm"
+                                >
                                     Create Purchase Order
                                 </button>
-                                <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50">
+                                <button
+                                    type="button" onClick={() => setShowModal(false)}
+                                    className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50"
+                                >
                                     Cancel
                                 </button>
                             </div>
