@@ -14,29 +14,69 @@ import {
   X,
   Menu,
   UserCircle,
-  Building2
+  Building2,
+  Boxes,
+  Tag,
+  ShoppingBag,
+  Truck,
+  UserPlus,
+  Briefcase,
+  FileText,
+  Wallet,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react'
 
 const adminNav = [
-    { label: 'Dashboard',       path: '/admin/dashboard',        icon: LayoutDashboard },
-    { label: 'Inventory',       path: '/inventory/dashboard',    icon: Package },
-    { label: 'Sales',           path: '/sales/dashboard',        icon: TrendingUp },
-    { label: 'Purchasing',      path: '/purchasing/dashboard',   icon: ShoppingCart },
-    { label: 'HR',              path: '/hr/dashboard',           icon: Users },
-    { label: 'Accounting',      path: '/accounting/dashboard',   icon: BookOpen },
-    { label: 'Analytics',       path: '/analytics/dashboard',    icon: BarChart3 },
-    { label: 'Users',           path: '/admin/users',            icon: Shield },
+    { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { 
+        label: 'Inventory', path: '/inventory/dashboard', icon: Package,
+        sub: [
+            { label: 'Products', path: '/inventory/products', icon: Boxes },
+            { label: 'Categories', path: '/inventory/categories', icon: Tag },
+        ]
+    },
+    { 
+        label: 'Sales', path: '/sales/dashboard', icon: ShoppingBag,
+        sub: [
+            { label: 'Orders', path: '/sales/orders', icon: ShoppingCart },
+            { label: 'Customers', path: '/sales/customers', icon: Users },
+        ]
+    },
+    { 
+        label: 'Purchasing', path: '/purchasing/dashboard', icon: ShoppingCart,
+        sub: [
+            { label: 'Purchase Orders', path: '/purchasing/orders', icon: FileText },
+            { label: 'Suppliers', path: '/purchasing/suppliers', icon: Truck },
+        ]
+    },
+    { 
+        label: 'HR', path: '/hr/dashboard', icon: Users,
+        sub: [
+            { label: 'Employees', path: '/hr/employees', icon: UserCircle },
+            { label: 'Job Positions', path: '/hr/jobs', icon: Briefcase },
+            { label: 'Candidates', path: '/hr/candidates', icon: UserPlus },
+        ]
+    },
+    { 
+        label: 'Accounting', path: '/accounting/dashboard', icon: BookOpen,
+        sub: [
+            { label: 'Transactions', path: '/accounting/transactions', icon: Wallet },
+        ]
+    },
+    { label: 'Analytics', path: '/analytics/dashboard', icon: BarChart3 },
+    { label: 'Users', path: '/admin/users', icon: Shield },
 ]
 
 const managerNav = [
-    { label: 'Dashboard',  path: '/manager/dashboard',      icon: LayoutDashboard },
-    { label: 'Sales',      path: '/sales/dashboard',        icon: TrendingUp },
-    { label: 'HR',         path: '/hr/dashboard',           icon: Users },
-    { label: 'Analytics',  path: '/analytics/dashboard',    icon: BarChart3 },
+    { label: 'Dashboard', path: '/manager/dashboard', icon: LayoutDashboard },
+    { label: 'Sales', path: '/sales/dashboard', icon: TrendingUp },
+    { label: 'HR', path: '/hr/dashboard', icon: Users },
+    { label: 'Analytics', path: '/analytics/dashboard', icon: BarChart3 },
 ]
 
 const employeeNav = [
-    { label: 'Dashboard',  path: '/employee/dashboard',     icon: LayoutDashboard },
+    { label: 'Dashboard', path: '/employee/dashboard', icon: LayoutDashboard },
 ]
 
 export default function Layout({ children }) {
@@ -44,6 +84,7 @@ export default function Layout({ children }) {
     const location = useLocation()
     const navigate = useNavigate()
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+    const [openSubmenus, setOpenSubmenus] = useState({})
 
     const nav = user?.role === 'admin'
         ? adminNav
@@ -58,6 +99,14 @@ export default function Layout({ children }) {
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen)
+    }
+
+    const toggleSubmenu = (label) => {
+        setOpenSubmenus(prev => ({ ...prev, [label]: !prev[label] }))
+    }
+
+    const isActive = (path) => {
+        return location.pathname === path || location.pathname.startsWith(path + '/')
     }
 
     return (
@@ -100,20 +149,60 @@ export default function Layout({ children }) {
                     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                         {nav.map((item) => {
                             const Icon = item.icon
-                            const isActive = location.pathname === item.path
+                            const active = isActive(item.path)
+                            const hasSub = item.sub && item.sub.length > 0
+                            const isSubmenuOpen = openSubmenus[item.label]
+                            
                             return (
-                                <Link
-                                    key={item.path}
-                                    to={item.path}
-                                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
-                                        isActive
-                                            ? 'bg-emerald-50 text-emerald-700'
-                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                    }`}
-                                >
-                                    <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-700' : 'text-gray-500 group-hover:text-gray-700'}`} />
-                                    <span>{item.label}</span>
-                                </Link>
+                                <div key={item.path}>
+                                    <Link
+                                        to={item.path}
+                                        onClick={(e) => {
+                                            if (hasSub) {
+                                                e.preventDefault()
+                                                toggleSubmenu(item.label)
+                                            }
+                                        }}
+                                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                                            active
+                                                ? 'bg-emerald-50 text-emerald-700'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Icon className={`w-5 h-5 ${active ? 'text-emerald-700' : 'text-gray-500 group-hover:text-gray-700'}`} />
+                                            <span>{item.label}</span>
+                                        </div>
+                                        {hasSub && (
+                                            isSubmenuOpen ? 
+                                                <ChevronDown className="w-4 h-4" /> : 
+                                                <ChevronRight className="w-4 h-4" />
+                                        )}
+                                    </Link>
+                                    
+                                    {hasSub && isSubmenuOpen && (
+                                        <div className="ml-9 mt-1 space-y-1">
+                                            {item.sub.map((subItem) => {
+                                                const SubIcon = subItem.icon
+                                                const subActive = location.pathname === subItem.path
+                                                return (
+                                                    <Link
+                                                        key={subItem.path}
+                                                        to={subItem.path}
+                                                        className={`flex items-center gap-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                                                            subActive
+                                                                ? 'bg-emerald-50 text-emerald-700'
+                                                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                                                        }`}
+                                                    >
+                                                        <SubIcon className={`w-3.5 h-3.5 ${subActive ? 'text-emerald-700' : 'text-gray-400'}`} />
+                                                        <span>{subItem.label}</span>
+                                                    </Link>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
                             )
                         })}
                     </nav>
@@ -142,7 +231,6 @@ export default function Layout({ children }) {
                         </>
                     ) : (
                         <div className="flex flex-col items-center gap-3">
-
                             <button
                                 onClick={handleLogout}
                                 className="text-red-600 hover:text-red-700 transition"
