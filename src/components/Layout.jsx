@@ -122,7 +122,7 @@ export default function Layout({ children }) {
                     {isSidebarOpen ? (
                         <>
                             <div>
-                                <h1 className="text-xl font-bold text-emerald-700">Pro_BMS</h1>
+                                <h1 className="text-xl font-bold text-emerald-700">Pro BMS</h1>
                                 <p className="text-xs text-gray-500 mt-0.5">Business Management</p>
                             </div>
                             <button

@@ -184,7 +184,7 @@ export default function Transactions() {
                         </p>
                     </div>
                 </div>
-
+.
                 {/* Search and Filter */}
                 <div className="flex flex-wrap gap-4 mb-6">
                     <div className="relative flex-1 md:flex-initial md:w-96">

@@ -58,7 +58,7 @@ export default function Login() {
                         </div>
                         
                         <div className="text-center mb-8">
-                            <h1 className="text-2xl font-bold text-black">Pro_BMS</h1>
+                            <h1 className="text-2xl font-bold text-black">Pro BMS</h1>
                             <p className="text-gray-600 text-sm mt-1">Business Management System</p>
                         </div>
 

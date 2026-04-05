@@ -116,7 +116,7 @@ export default function AccountingDashboard() {
                         </p>
                     </div>
                 </div>
-
+.
                 {/* Monthly Report Table - Changed to rounded-md */}
                 <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg overflow-hidden">
                     <div className="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
