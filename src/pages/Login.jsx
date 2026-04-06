@@ -10,25 +10,32 @@ export default function Login() {
     const [error, setError]       = useState('')
     const [loading, setLoading]   = useState(false)
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setError('')
-        setLoading(true)
-        try {
-            const user = await login(email, password)
-            if (user.role === 'admin') {
-                navigate('/admin/dashboard')
-            } else if (user.role === 'manager') {
-                navigate('/manager/dashboard')
-            } else {
+const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+        const user = await login(email, password)
+        if (user.role === 'admin') {
+            navigate('/admin/dashboard')
+        } else if (user.role === 'manager') {
+            navigate('/manager/dashboard')
+        } else {
+            // Check if customer or employee
+            try {
+                const r = await api.get('/hr/my-profile')
                 navigate('/employee/dashboard')
+            } catch {
+                // No employee profile = customer
+                navigate('/shop')
             }
-        } catch (err) {
-            setError('Invalid email or password. Please try again.')
-        } finally {
-            setLoading(false)
         }
+    } catch (err) {
+        setError('Invalid email or password. Please try again.')
+    } finally {
+        setLoading(false)
     }
+}
 
     return (
         <div 

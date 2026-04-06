@@ -24,6 +24,8 @@ import AnalyticsDashboard   from './pages/analytics/AnalyticsDashboard'
 import UserManagement from './pages/admin/UserManagement'
 import JobApplication    from './pages/public/JobApplication'
 import CustomerRegister  from './pages/public/CustomerRegister'
+import ProfileSettings from './pages/profile/ProfileSettings'
+import CustomerShop from './pages/customer/CustomerShop'
 
 function PrivateRoute({ children, role, permission }) {
     const { user, loading } = useAuth()
@@ -70,6 +72,8 @@ function App() {
 <Route path="/careers"  element={<JobApplication />} />
 <Route path="/register" element={<CustomerRegister />} />
 
+<Route path="/shop" element={<CustomerShop />} />
+
                 {/* HR */}
                 <Route path="/hr/dashboard"  element={<PrivateRoute><HRDashboard /></PrivateRoute>} />
                 <Route path="/hr/employees"  element={<PrivateRoute><Employees /></PrivateRoute>} />
@@ -83,6 +87,8 @@ function App() {
 <Route path="/admin/users" element={
     <PrivateRoute role="admin"><UserManagement /></PrivateRoute>
 } />
+
+<Route path="/profile" element={<PrivateRoute><ProfileSettings /></PrivateRoute>} />
 
                 {/* Analytics */}
                 <Route path="/analytics/dashboard" element={<PrivateRoute><AnalyticsDashboard /></PrivateRoute>} />

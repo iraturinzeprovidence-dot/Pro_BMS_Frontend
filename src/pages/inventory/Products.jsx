@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { inventoryApi } from '../../api/inventoryApi'
+import { uploadProductImage } from '../../api/imageApi'
 import {
   Package,
   PlusCircle,
@@ -174,10 +175,42 @@ export default function Products() {
                             <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="7" className="text-center py-8 text-gray-500">
-                                            <Package className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                                            Loading products...
-                                        </td>
+<td className="px-6 py-3">
+    <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+            {p.image ? (
+                <img
+                    src={`http://localhost:8000/storage/${p.image}`}
+                    alt={p.name}
+                    className="w-full h-full object-cover"
+                />
+            ) : (
+                <Package className="w-5 h-5 text-gray-300" />
+            )}
+        </div>
+        <div>
+            <p className="font-medium text-gray-800">{p.name}</p>
+            <label className="text-xs text-blue-500 hover:underline cursor-pointer">
+                {p.image ? 'Change image' : 'Add image'}
+                <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                        const file = e.target.files[0]
+                        if (!file) return
+                        try {
+                            await uploadProductImage(p.id, file)
+                            fetchProducts()
+                        } catch {
+                            alert('Failed to upload image')
+                        }
+                    }}
+                />
+            </label>
+        </div>
+    </div>
+</td>
                                     </tr>
                                 ) : products.length === 0 ? (
                                     <tr>
