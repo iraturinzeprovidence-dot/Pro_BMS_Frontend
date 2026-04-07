@@ -44,6 +44,15 @@ function PrivateRoute({ children, role, permission }) {
     return <Layout>{children}</Layout>
 }
 
+function CustomerShopRoute({ children }) {
+    const { user, loading } = useAuth()
+    if (loading) return <div className="flex items-center justify-center h-screen text-gray-400">Loading...</div>
+    if (!user) return <Navigate to="/login" />
+    // Only customers can access shop
+    if (user.role !== 'customer') return <Navigate to="/admin/dashboard" />
+    return children
+}
+
 function App() {
     return (
         <BrowserRouter>
@@ -72,7 +81,12 @@ function App() {
 <Route path="/careers"  element={<JobApplication />} />
 <Route path="/register" element={<CustomerRegister />} />
 
-<Route path="/shop" element={<CustomerShop />} />
+{/* Customer Shop — customers only */}
+<Route path="/shop" element={
+    <CustomerShopRoute>
+        <CustomerShop />
+    </CustomerShopRoute>
+} />
 
                 {/* HR */}
                 <Route path="/hr/dashboard"  element={<PrivateRoute><HRDashboard /></PrivateRoute>} />

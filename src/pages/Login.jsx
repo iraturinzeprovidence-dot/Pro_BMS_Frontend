@@ -20,15 +20,11 @@ const handleSubmit = async (e) => {
             navigate('/admin/dashboard')
         } else if (user.role === 'manager') {
             navigate('/manager/dashboard')
+        } else if (user.role === 'customer') {
+            navigate('/shop')
         } else {
-            // Check if customer or employee
-            try {
-                const r = await api.get('/hr/my-profile')
-                navigate('/employee/dashboard')
-            } catch {
-                // No employee profile = customer
-                navigate('/shop')
-            }
+            // Employee
+            navigate('/employee/dashboard')
         }
     } catch (err) {
         setError('Invalid email or password. Please try again.')

@@ -1,46 +1,67 @@
 import { useState, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { uploadAvatar } from '../../api/imageApi'
-import { Camera, User, Save, UserCircle, Mail, Shield } from 'lucide-react'
+import { Camera, Save, User, Mail, Shield, UserCircle, X, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function ProfileSettings() {
-    const { user, login }             = useAuth()
-    const [preview, setPreview]       = useState(null)
-    const [uploading, setUploading]   = useState(false)
-    const [success, setSuccess]       = useState('')
-    const [error, setError]           = useState('')
-    const fileRef                     = useRef()
+    const { user, updateUser } = useAuth()
+    const [preview, setPreview] = useState(null)
+    const [selectedFile, setSelectedFile] = useState(null)
+    const [uploading, setUploading] = useState(false)
+    const [success, setSuccess] = useState('')
+    const [error, setError] = useState('')
+    const fileRef = useRef()
 
     const handleFileChange = (e) => {
         const file = e.target.files[0]
         if (!file) return
+        
+        // Validate file size (2MB max)
+        if (file.size > 2 * 1024 * 1024) {
+            setError('File size exceeds 2MB. Please choose a smaller image.')
+            return
+        }
+        
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
+        if (!allowedTypes.includes(file.type)) {
+            setError('Only JPG, PNG, or WEBP images are allowed.')
+            return
+        }
+        
+        setSelectedFile(file)
         setPreview(URL.createObjectURL(file))
+        setSuccess('')
+        setError('')
     }
 
     const handleUpload = async () => {
-        const file = fileRef.current.files[0]
-        if (!file) return
+        if (!selectedFile) return
         setUploading(true)
         setError('')
         setSuccess('')
         try {
-            const r = await uploadAvatar(file)
-            setSuccess('Profile picture updated successfully!')
+            const r = await uploadAvatar(selectedFile)
             const updated = { ...user, avatar: r.avatar }
-            localStorage.setItem('user', JSON.stringify(updated))
+            updateUser(updated)
+            setPreview(null)
+            setSelectedFile(null)
+            setSuccess('Profile picture updated successfully!')
+            
+            // Clear success message after 3 seconds
+            setTimeout(() => setSuccess(''), 3000)
         } catch (err) {
-            setError('Failed to upload image. Max size is 2MB.')
+            setError('Failed to upload image. Please try again.')
         } finally {
             setUploading(false)
         }
     }
 
-    const avatarUrl = preview
-        ?? (user?.avatar ? user.avatar : null)
+    const avatarUrl = preview ?? user?.avatar ?? null
 
     return (
         <div 
-            className="relative min-h-screen w-full flex items-center justify-center"
+            className="relative min-h-screen w-full"
             style={{
                 backgroundImage: `url('/src/assets/istockphoto-1477198926-612x612.jpg')`,
                 backgroundSize: '100% 100%',
@@ -52,114 +73,121 @@ export default function ProfileSettings() {
             {/* Dark green overlay */}
             <div className="absolute inset-0 bg-emerald-900/30"></div>
             
-            {/* Content - Centered */}
-            <div className="relative z-10 w-full max-w-2xl mx-auto px-4">
-                {/* Header - Centered */}
-                <div className="text-center mb-8">
-                    <div className="flex justify-center mb-3">
-                        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-                            <UserCircle className="w-8 h-8 text-emerald-700" />
+            {/* Content */}
+            <div className="relative z-10 p-8">
+                <div className="max-w-2xl mx-auto">
+                    {/* Header Section */}
+                    <div className="mb-8">
+                        <div className="flex items-center gap-3 mb-2">
+                            <UserCircle className="w-7 h-7 text-emerald-800" />
+                            <h2 className="text-2xl font-bold text-black drop-shadow-lg">Profile Settings</h2>
                         </div>
+                        <p className="text-gray-700 ml-10 drop-shadow-md font-medium">
+                            Manage your account profile picture
+                        </p>
                     </div>
-                    <h2 className="text-2xl font-bold text-black drop-shadow-lg">Profile Settings</h2>
-                    <p className="text-gray-700 mt-1 drop-shadow-sm font-medium">
-                        Manage your account profile
-                    </p>
-                </div>
 
-                {/* Avatar Section - Centered */}
-                <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg p-6 mb-6">
-                    <h3 className="font-semibold text-black text-lg mb-4 text-center">Profile Picture</h3>
+                    {/* Avatar Section */}
+                    <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg p-6 mb-6">
+                        <h3 className="font-semibold text-black text-lg mb-5">Profile Picture</h3>
 
-                    <div className="flex flex-col items-center gap-4">
-                        {/* Avatar Preview - Centered */}
-                        <div className="relative">
-                            <div className="w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden border-2 border-emerald-200">
-                                {avatarUrl ? (
-                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                                ) : (
-                                    <User className="w-10 h-10 text-emerald-700" />
-                                )}
+                        <div className="flex flex-col sm:flex-row items-center gap-6">
+                            {/* Avatar Preview */}
+                            <div className="relative flex-shrink-0">
+                                <div className="w-28 h-28 rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-md">
+                                    {avatarUrl ? (
+                                        <img
+                                            src={avatarUrl}
+                                            alt="Avatar"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-3xl font-bold text-emerald-700">
+                                            {user?.name?.charAt(0).toUpperCase()}
+                                        </span>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => fileRef.current.click()}
+                                    className="absolute bottom-0 right-0 w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center border-2 border-white hover:bg-emerald-700 transition shadow-md"
+                                >
+                                    <Camera className="w-4 h-4 text-white" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => fileRef.current.click()}
-                                className="absolute bottom-0 right-0 w-7 h-7 bg-emerald-700 rounded-full flex items-center justify-center border-2 border-white hover:bg-emerald-800 transition"
-                            >
-                                <Camera className="w-3 h-3 text-white" />
-                            </button>
+
+                            {/* Upload Controls */}
+                            <div className="flex-1 text-center sm:text-left">
+                                <p className="text-base font-semibold text-black">{user?.name}</p>
+                                <p className="text-sm text-gray-500 capitalize mb-3">{user?.role}</p>
+
+                                <input
+                                    ref={fileRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,image/jpg"
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                />
+
+                                <button
+                                    onClick={() => fileRef.current.click()}
+                                    className="text-sm border border-gray-300 px-4 py-2 rounded-md text-gray-600 hover:bg-gray-50 transition"
+                                >
+                                    Choose Photo
+                                </button>
+                                <p className="text-xs text-gray-400 mt-2">JPG, PNG or WebP. Max 2MB.</p>
+                            </div>
                         </div>
 
-                        {/* Upload Info - Centered */}
-                        <div className="text-center">
-                            <p className="text-sm font-medium text-gray-800 mb-1">{user?.name}</p>
-                            <p className="text-xs text-gray-500 mb-3 capitalize">{user?.role}</p>
-                            <input
-                                ref={fileRef}
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                className="hidden"
-                            />
-                            <button
-                                onClick={() => fileRef.current.click()}
-                                className="text-xs border border-gray-300 rounded-md px-4 py-1.5 text-gray-600 hover:bg-gray-50 transition"
-                            >
-                                Choose Photo
-                            </button>
-                        </div>
-                    </div>
+                        {/* Feedback Messages */}
+                        {success && (
+                            <div className="mt-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-md flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4" />
+                                {success}
+                            </div>
+                        )}
+                        {error && (
+                            <div className="mt-4 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-md flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4" />
+                                {error}
+                            </div>
+                        )}
 
-                    {success && (
-                        <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-2.5 rounded-md flex items-center justify-center gap-2 mt-4">
-                            <div className="w-1.5 h-1.5 bg-green-600 rounded-full"></div>
-                            {success}
-                        </div>
-                    )}
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded-md flex items-center justify-center gap-2 mt-4">
-                            <div className="w-1.5 h-1.5 bg-red-600 rounded-full"></div>
-                            {error}
-                        </div>
-                    )}
-
-                    {preview && (
-                        <div className="flex justify-center mt-4">
+                        {/* Save Button */}
+                        {selectedFile && (
                             <button
                                 onClick={handleUpload}
                                 disabled={uploading}
-                                className="flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium px-5 py-2.5 rounded-md transition disabled:opacity-50"
+                                className="mt-4 flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium px-5 py-2.5 rounded-md disabled:opacity-50 transition"
                             >
                                 <Save className="w-4 h-4" />
                                 {uploading ? 'Uploading...' : 'Save Profile Picture'}
                             </button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Account Info - Centered */}
-                <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg p-6">
-                    <h3 className="font-semibold text-black text-lg mb-4 text-center">Account Information</h3>
-                    <div className="space-y-3">
-                        {[
-                            { label: 'Full Name', value: user?.name, icon: User },
-                            { label: 'Email', value: user?.email, icon: Mail },
-                            { label: 'Role', value: user?.role, icon: Shield },
-                        ].map(item => {
-                            const Icon = item.icon
-                            return (
-                                <div key={item.label} className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <div className="flex items-center gap-2">
-                                        <Icon className="w-3.5 h-3.5 text-gray-400" />
-                                        <span className="text-sm text-gray-600">{item.label}</span>
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-800 capitalize">{item.value}</span>
-                                </div>
-                            )
-                        })}
+                        )}
                     </div>
-                    <div className="bg-gray-50 rounded-md p-3 mt-4 border border-gray-100 text-center">
-                        <p className="text-xs text-gray-500">
-                            To change your name, email or password contact your admin.
+
+                    {/* Account Info */}
+                    <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg p-6">
+                        <h3 className="font-semibold text-black text-lg mb-4">Account Information</h3>
+                        <div className="space-y-3">
+                            {[
+                                { label: 'Full Name', value: user?.name, icon: User },
+                                { label: 'Email', value: user?.email, icon: Mail },
+                                { label: 'Role', value: user?.role, icon: Shield },
+                            ].map(item => {
+                                const Icon = item.icon
+                                return (
+                                    <div key={item.label} className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0">
+                                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                                            <Icon className="w-4 h-4" />
+                                            {item.label}
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-800 capitalize">{item.value || '—'}</span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-4 pt-2 border-t border-gray-100">
+                            To change your name, email or password, please contact your administrator.
                         </p>
                     </div>
                 </div>
