@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -7,10 +8,49 @@ import {
   LayoutDashboard,
   UserCircle
 } from 'lucide-react'
+import { salesApi } from '../../api/salesApi'
+import { hrApi } from '../../api/hrApi'
 
 export default function ManagerDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalSales: 0,
+    teamMembers: 0,
+    kpiAchievement: 0
+  })
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true)
+      try {
+        // Fetch sales data for current month
+        const salesData = await salesApi.getOrderStats()
+        const currentMonthSales = salesData?.data?.current_month_revenue || 0
+        
+        // Fetch team members count
+        const employees = await hrApi.getEmployees({ department: user?.department })
+        const teamCount = employees?.data?.length || 0
+        
+        // Calculate KPI achievement (example: based on sales target)
+        const salesTarget = 50000 // Example target
+        const achievement = salesTarget > 0 ? (currentMonthSales / salesTarget) * 100 : 0
+        
+        setStats({
+          totalSales: currentMonthSales,
+          teamMembers: teamCount,
+          kpiAchievement: Math.min(Math.round(achievement), 100)
+        })
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchStats()
+  }, [user?.department])
 
   const modules = [
     { name: 'Sales', desc: 'Orders, invoices and customers', icon: TrendingUp, path: '/sales/dashboard' },
@@ -72,7 +112,11 @@ export default function ManagerDashboard() {
                 <TrendingUp className="w-5 h-5 text-emerald-800" />
                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">This Month</span>
               </div>
-              <p className="text-2xl font-bold text-black mb-0.5">0</p>
+              {loading ? (
+                <div className="h-8 w-20 bg-gray-200 rounded animate-pulse"></div>
+              ) : (
+                <p className="text-2xl font-bold text-black mb-0.5">{stats.totalSales.toLocaleString()}</p>
+              )}
               <p className="text-xs text-gray-600 font-medium">Total Sales</p>
             </div>
             <div className="bg-white/80 backdrop-blur-md rounded-lg p-4 border border-gray-200 shadow-lg">
@@ -80,7 +124,11 @@ export default function ManagerDashboard() {
                 <Users className="w-5 h-5 text-emerald-800" />
                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Department</span>
               </div>
-              <p className="text-2xl font-bold text-black mb-0.5">0</p>
+              {loading ? (
+                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+              ) : (
+                <p className="text-2xl font-bold text-black mb-0.5">{stats.teamMembers}</p>
+              )}
               <p className="text-xs text-gray-600 font-medium">Team Members</p>
             </div>
             <div className="bg-white/80 backdrop-blur-md rounded-lg p-4 border border-gray-200 shadow-lg">
@@ -88,7 +136,11 @@ export default function ManagerDashboard() {
                 <BarChart3 className="w-5 h-5 text-emerald-800" />
                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Performance</span>
               </div>
-              <p className="text-2xl font-bold text-black mb-0.5">0%</p>
+              {loading ? (
+                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+              ) : (
+                <p className="text-2xl font-bold text-black mb-0.5">{stats.kpiAchievement}%</p>
+              )}
               <p className="text-xs text-gray-600 font-medium">KPI Achievement</p>
             </div>
           </div>

@@ -80,7 +80,7 @@ const employeeNav = [
 ]
 
 export default function Layout({ children }) {
-    const { user, logout } = useAuth()
+    const { user, profile, logout } = useAuth()
     const location = useLocation()
     const navigate = useNavigate()
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -108,6 +108,20 @@ export default function Layout({ children }) {
     const isActive = (path) => {
         return location.pathname === path || location.pathname.startsWith(path + '/')
     }
+
+    // Get profile picture URL from user or profile
+    const getProfilePicture = () => {
+        if (user?.avatar) {
+            return user.avatar
+        }
+        if (profile?.avatar) {
+            return profile.avatar
+        }
+        return null
+    }
+
+    const profilePicture = getProfilePicture()
+    const userInitial = user?.name?.charAt(0).toUpperCase() || 'U'
 
     return (
         <div className="flex h-screen bg-gray-50">
@@ -208,33 +222,70 @@ export default function Layout({ children }) {
                     </nav>
                 )}
 
-<div className="px-4 py-4 border-t border-gray-200">
-    <button
-        onClick={() => navigate('/profile')}
-        className="flex items-center justify-center gap-3 mb-3 w-full hover:bg-emerald-50 rounded-md p-2 transition group"
-    >
-        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold overflow-hidden flex-shrink-0">
-            {user?.avatar ? (
-                <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
-            ) : (
-                user?.name?.charAt(0).toUpperCase()
-            )}
-        </div>
-        <div className="text-center">
-            <p className="text-sm font-medium text-gray-800 truncate">{user?.name}</p>
-            <p className="text-xs text-gray-500 capitalize truncate">
-                {user?.role === 'employee' && profile ? profile.job_title : user?.role}
-            </p>
-        </div>
-    </button>
-    <button
-        onClick={handleLogout}
-        className="w-full flex items-center justify-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium transition py-1.5 rounded-md hover:bg-red-50"
-    >
-        <LogOut className="w-4 h-4" />
-        Logout
-    </button>
-</div>
+                {/* User Section - Sidebar Open */}
+                {isSidebarOpen && (
+                    <div className="px-4 py-4 border-t border-gray-200">
+                        <button
+                            onClick={() => navigate('/profile')}
+                            className="flex items-center gap-3 w-full hover:bg-emerald-50 rounded-md p-2 transition group"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold overflow-hidden flex-shrink-0">
+                                {profilePicture ? (
+                                    <img 
+                                        src={profilePicture} 
+                                        alt="Profile" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    userInitial
+                                )}
+                            </div>
+                            <div className="flex-1 text-left">
+                                <p className="text-sm font-medium text-gray-800 truncate">{user?.name}</p>
+                                <p className="text-xs text-gray-500 capitalize truncate">
+                                    {user?.role === 'employee' && profile ? profile.job_title : user?.role}
+                                </p>
+                            </div>
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center justify-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium transition py-1.5 rounded-md hover:bg-red-50 mt-2"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            Logout
+                        </button>
+                    </div>
+                )}
+
+                {/* User Section - Sidebar Collapsed - Only Profile Picture and Logout Icon */}
+                {!isSidebarOpen && (
+                    <div className="px-2 py-4 border-t border-gray-200 mt-auto">
+                        <button
+                            onClick={() => navigate('/profile')}
+                            className="flex justify-center w-full mb-3 hover:opacity-80 transition"
+                            title={user?.name}
+                        >
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold overflow-hidden">
+                                {profilePicture ? (
+                                    <img 
+                                        src={profilePicture} 
+                                        alt="Profile" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    userInitial
+                                )}
+                            </div>
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="flex justify-center w-full text-red-600 hover:text-red-700 transition p-1.5 rounded-md hover:bg-red-50"
+                            title="Logout"
+                        >
+                            <LogOut className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
             </aside>
 
             {/* Main Content */}

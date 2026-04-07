@@ -175,42 +175,10 @@ export default function Products() {
                             <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
-<td className="px-6 py-3">
-    <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-            {p.image ? (
-                <img
-                    src={`http://localhost:8000/storage/${p.image}`}
-                    alt={p.name}
-                    className="w-full h-full object-cover"
-                />
-            ) : (
-                <Package className="w-5 h-5 text-gray-300" />
-            )}
-        </div>
-        <div>
-            <p className="font-medium text-gray-800">{p.name}</p>
-            <label className="text-xs text-blue-500 hover:underline cursor-pointer">
-                {p.image ? 'Change image' : 'Add image'}
-                <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                        const file = e.target.files[0]
-                        if (!file) return
-                        try {
-                            await uploadProductImage(p.id, file)
-                            fetchProducts()
-                        } catch {
-                            alert('Failed to upload image')
-                        }
-                    }}
-                />
-            </label>
-        </div>
-    </div>
-</td>
+                                        <td colSpan="7" className="text-center py-8 text-gray-500">
+                                            <Package className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                                            Loading products...
+                                        </td>
                                     </tr>
                                 ) : products.length === 0 ? (
                                     <tr>
@@ -223,9 +191,39 @@ export default function Products() {
                                 ) : products.map((p) => (
                                     <tr key={p.id} className="hover:bg-white/40 transition-colors">
                                         <td className="px-5 py-3">
-                                            <div className="flex items-center gap-2">
-                                                <Box className="w-4 h-4 text-gray-500" />
-                                                <span className="font-medium text-gray-800">{p.name}</span>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                    {p.image ? (
+                                                        <img
+                                                            src={`http://localhost:8000/storage/${p.image}`}
+                                                            alt={p.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <Package className="w-5 h-5 text-gray-300" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-800">{p.name}</p>
+                                                    <label className="text-xs text-emerald-600 hover:text-emerald-700 cursor-pointer">
+                                                        {p.image ? 'Change image' : 'Add image'}
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            className="hidden"
+                                                            onChange={async (e) => {
+                                                                const file = e.target.files[0]
+                                                                if (!file) return
+                                                                try {
+                                                                    await uploadProductImage(p.id, file)
+                                                                    fetchProducts()
+                                                                } catch {
+                                                                    alert('Failed to upload image')
+                                                                }
+                                                            }}
+                                                        />
+                                                    </label>
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-5 py-3">
@@ -246,7 +244,7 @@ export default function Products() {
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-1">
                                                 <DollarSign className="w-3.5 h-3.5 text-gray-500" />
-                                                <span className="text-gray-800 font-medium">{Number(p.price).toFixed(2)}</span>
+                                                <span className="text-gray-800 font-medium">${Number(p.price).toFixed(2)}</span>
                                             </div>
                                         </td>
                                         <td className="px-5 py-3">
