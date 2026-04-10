@@ -225,12 +225,12 @@ export default function Candidates() {
                                     </div>
 
                                     {/* Position */}
-                                    {c.job_position && (
-                                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                                            <Briefcase className="w-3 h-3" />
-                                            <span>{c.job_position.title} — {c.job_position.department}</span>
-                                        </div>
-                                    )}
+{(c.job_position ?? c.job_position) && (
+    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+        <Briefcase className="w-3 h-3" />
+        <span>{(c.job_position)?.title} — {(c.job_position)?.department}</span>
+    </div>
+)}
 
                                     {/* Phone */}
                                     {c.phone && (
@@ -373,28 +373,30 @@ export default function Candidates() {
                         </div>
                     </div>
                 </div>
-
-                {/* Position Applied For */}
-                <div className="border border-blue-100 bg-blue-50 rounded-xl p-4">
-                    <h5 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
-                        <Briefcase className="w-4 h-4" />
-                        Position Applied For
-                    </h5>
-                    {viewing.job_position ? (
-                        <div className="space-y-1">
-                            <p className="font-bold text-gray-800">{viewing.job_position.title}</p>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Building2 className="w-3 h-3" />
-                                <span>{viewing.job_position.department}</span>
-                            </div>
-                            <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                {viewing.job_position.type?.replace('_', ' ')}
-                            </span>
-                        </div>
-                    ) : (
-                        <p className="text-sm text-gray-500">No specific position selected</p>
-                    )}
-                </div>
+ 
+{/* Position Applied For */}
+<div className="border border-blue-100 bg-blue-50 rounded-xl p-4">
+    <h5 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
+        <Briefcase className="w-4 h-4" />
+        Position Applied For
+    </h5>
+    {(viewing.job_position || viewing.jobPosition) ? (
+        <div className="space-y-1">
+            <p className="font-bold text-gray-800">
+                {(viewing.job_position || viewing.jobPosition)?.title}
+            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Building2 className="w-3 h-3" />
+                <span>{(viewing.job_position || viewing.jobPosition)?.department}</span>
+            </div>
+            <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                {(viewing.job_position || viewing.jobPosition)?.type?.replace('_', ' ')}
+            </span>
+        </div>
+    ) : (
+        <p className="text-sm text-gray-500">No specific position selected</p>
+    )}
+</div>
 
                 {/* Cover Letter */}
                 <div>

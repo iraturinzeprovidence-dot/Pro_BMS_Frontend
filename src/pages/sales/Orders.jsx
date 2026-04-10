@@ -3,56 +3,23 @@ import { salesApi } from '../../api/salesApi'
 import { inventoryApi } from '../../api/inventoryApi'
 import { pdfApi, downloadPdf } from '../../api/pdfApi'
 import {
-  ShoppingCart,
-  PlusCircle,
-  Search,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
-  Clock,
-  DollarSign,
-  Users,
-  Package,
-  Truck,
-  Calendar,
-  FileText,
-  Printer,
-  Eye,
-  X,
-  AlertCircle,
-  Send,
-  RefreshCw,
-  CreditCard,
-  TrendingUp
+    Plus, Search, FileDown, CheckCircle,
+    Trash2, Truck, Clock, XCircle, Package,
+    ShoppingCart, Users, DollarSign, Calendar,
+    FileText, CreditCard, X, AlertCircle, Send,
+    PlusCircle, Eye, TrendingUp, RefreshCw
 } from 'lucide-react'
 
 export default function Orders() {
-    const [currency, setCurrency] = useState('USD')
-
-    const currencies = [
-        { code: 'USD', symbol: '$', name: 'US Dollar' },
-        { code: 'EUR', symbol: '€', name: 'Euro' },
-        { code: 'GBP', symbol: '£', name: 'British Pound' },
-        { code: 'RWF', symbol: 'RWF', name: 'Rwandan Franc' },
-        { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
-        { code: 'UGX', symbol: 'USh', name: 'Ugandan Shilling' },
-        { code: 'TZS', symbol: 'TSh', name: 'Tanzanian Shilling' },
-        { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
-        { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
-    ]
-
-    const currencySymbol = currencies.find(c => c.code === currency)?.symbol ?? '$'
-
-    const [orders, setOrders]       = useState([])
-    const [customers, setCustomers] = useState([])
-    const [products, setProducts]   = useState([])
-    const [search, setSearch]       = useState('')
-    const [loading, setLoading]     = useState(true)
-    const [showModal, setShowModal] = useState(false)
-    const [error, setError]         = useState('')
+    const [orders, setOrders]         = useState([])
+    const [customers, setCustomers]   = useState([])
+    const [products, setProducts]     = useState([])
+    const [search, setSearch]         = useState('')
+    const [loading, setLoading]       = useState(true)
+    const [showModal, setShowModal]   = useState(false)
+    const [error, setError]           = useState('')
     const [pdfLoading, setPdfLoading] = useState(null)
-    const [form, setForm]           = useState({
+    const [form, setForm]             = useState({
         customer_id: '', payment_method: 'cash',
         payment_status: 'unpaid', tax: '0', discount: '0', notes: '',
         items: [{ product_id: '', quantity: 1, unit_price: 0 }],
@@ -66,13 +33,8 @@ export default function Orders() {
     }
 
     useEffect(() => {
-        salesApi.getCustomers({}).then(r => {
-            setCustomers(r.data)
-        }).catch(err => {
-            console.error('Failed to load customers:', err)
-        })
+        salesApi.getCustomers({}).then(r => setCustomers(r.data))
         inventoryApi.getProducts({}).then(r => setProducts(r.data))
-        fetchOrders()
     }, [])
 
     useEffect(() => { fetchOrders() }, [search])
@@ -87,25 +49,20 @@ export default function Orders() {
         setShowModal(true)
     }
 
-    const addItem = () => {
-        setForm({ ...form, items: [...form.items, { product_id: '', quantity: 1, unit_price: 0 }] })
-    }
-
-    const removeItem = (index) => {
-        setForm({ ...form, items: form.items.filter((_, i) => i !== index) })
-    }
+    const addItem    = () => setForm({ ...form, items: [...form.items, { product_id: '', quantity: 1, unit_price: 0 }] })
+    const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) })
 
     const updateItem = (index, field, value) => {
         const items = [...form.items]
         items[index][field] = value
         if (field === 'product_id') {
-            const product = products.find(p => p.id == value)
-            if (product) items[index].unit_price = product.price
+            const p = products.find(p => p.id == value)
+            if (p) items[index].unit_price = p.price
         }
         setForm({ ...form, items })
     }
 
-    const getSubtotal = () => form.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)
+    const getSubtotal = () => form.items.reduce((s, i) => s + i.quantity * i.unit_price, 0)
     const getTotal    = () => getSubtotal() + Number(form.tax) - Number(form.discount)
 
     const handleSubmit = async (e) => {
@@ -120,7 +77,7 @@ export default function Orders() {
         }
     }
 
-    const handleUpdateStatus = async (id, status, payment_status) => {
+    const handleStatusUpdate = async (id, status, payment_status) => {
         await salesApi.updateOrder(id, { status, payment_status })
         fetchOrders()
     }
@@ -136,25 +93,53 @@ export default function Orders() {
         try {
             const r = await pdfApi.exportOrder(id)
             downloadPdf(r.data, `order-${orderNumber}.pdf`)
-        } catch (err) {
-            alert('Failed to export PDF. Please try again.')
+        } catch {
+            alert('Failed to export PDF')
         } finally {
             setPdfLoading(null)
         }
     }
 
-    const statusConfig = (s) => ({
-        pending:    { color: 'bg-yellow-100 text-yellow-700', icon: Clock, label: 'Pending' },
-        processing: { color: 'bg-blue-100 text-blue-700', icon: RefreshCw, label: 'Processing' },
-        completed:  { color: 'bg-green-100 text-green-700', icon: CheckCircle, label: 'Completed' },
-        cancelled:  { color: 'bg-red-100 text-red-700', icon: XCircle, label: 'Cancelled' },
-    }[s] ?? { color: 'bg-gray-100 text-gray-600', icon: Clock, label: s })
+    const STAGES = [
+        { status: 'pending',    label: 'Pending',    icon: Clock,        color: 'bg-yellow-100 text-yellow-700' },
+        { status: 'processing', label: 'Processing', icon: RefreshCw,    color: 'bg-blue-100 text-blue-700'    },
+        { status: 'delivering', label: 'Delivering', icon: Truck,        color: 'bg-purple-100 text-purple-700'},
+        { status: 'completed',  label: 'Completed',  icon: CheckCircle,  color: 'bg-green-100 text-green-700'  },
+    ]
 
-    const paymentConfig = (s) => ({
-        unpaid:  { color: 'bg-red-100 text-red-700', icon: XCircle, label: 'Unpaid' },
-        paid:    { color: 'bg-green-100 text-green-700', icon: CheckCircle, label: 'Paid' },
-        partial: { color: 'bg-yellow-100 text-yellow-700', icon: Clock, label: 'Partial' },
-    }[s] ?? { color: 'bg-gray-100 text-gray-600', icon: Clock, label: s })
+    const stageColor = (s) => ({
+        pending:    'bg-yellow-100 text-yellow-700',
+        processing: 'bg-blue-100 text-blue-700',
+        delivering: 'bg-purple-100 text-purple-700',
+        completed:  'bg-green-100 text-green-700',
+        cancelled:  'bg-red-100 text-red-700',
+    }[s] ?? 'bg-gray-100 text-gray-600')
+
+    const stageIcon = (s) => ({
+        pending:    Clock,
+        processing: RefreshCw,
+        delivering: Truck,
+        completed:  CheckCircle,
+        cancelled:  XCircle,
+    }[s] ?? Clock)
+
+    const paymentColor = (s) => ({
+        unpaid:  'bg-red-100 text-red-700',
+        paid:    'bg-green-100 text-green-700',
+        partial: 'bg-yellow-100 text-yellow-700',
+    }[s] ?? 'bg-gray-100 text-gray-600')
+
+    const nextStage = (current) => ({
+        pending:    'processing',
+        processing: 'delivering',
+        delivering: 'completed',
+    }[current] ?? null)
+
+    const nextStageLabel = (current) => ({
+        pending:    'Start Processing',
+        processing: 'Mark Delivering',
+        delivering: 'Mark Completed',
+    }[current] ?? null)
 
     return (
         <div 
@@ -167,10 +152,8 @@ export default function Orders() {
                 backgroundAttachment: 'fixed'
             }}
         >
-            {/* Dark green overlay */}
             <div className="absolute inset-0 bg-emerald-900/30"></div>
             
-            {/* Content */}
             <div className="relative z-10 p-8">
                 {/* Header Section */}
                 <div className="flex justify-between items-center mb-6">
@@ -192,20 +175,19 @@ export default function Orders() {
                     </button>
                 </div>
 
-                {/* Currency Selector */}
-                <div className="mb-4 flex justify-end">
-                    <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-md px-3 py-1.5 border border-gray-200">
-                        <DollarSign className="w-4 h-4 text-gray-500" />
-                        <select
-                            value={currency}
-                            onChange={(e) => setCurrency(e.target.value)}
-                            className="bg-transparent text-sm focus:outline-none text-gray-700"
-                        >
-                            {currencies.map(c => (
-                                <option key={c.code} value={c.code}>{c.code} - {c.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                {/* Stage Summary Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+                    {[...STAGES, { status: 'cancelled', label: 'Cancelled', icon: XCircle, color: 'bg-red-100 text-red-700' }].map(s => {
+                        const Icon = s.icon
+                        const count = orders.filter(o => o.status === s.status).length
+                        return (
+                            <div key={s.status} className={`${s.color} rounded-md p-3 text-center shadow-sm`}>
+                                <Icon className="w-5 h-5 mx-auto mb-1" />
+                                <p className="text-xl font-bold">{count}</p>
+                                <p className="text-xs font-medium">{s.label}</p>
+                            </div>
+                        )
+                    })}
                 </div>
 
                 {/* Search Bar */}
@@ -231,7 +213,7 @@ export default function Orders() {
                                     <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Order #</th>
                                     <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Customer</th>
                                     <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Total</th>
-                                    <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Stage</th>
                                     <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Payment</th>
                                     <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Date</th>
                                     <th className="text-left px-5 py-3 text-gray-700 font-semibold text-xs uppercase tracking-wider">Actions</th>
@@ -254,10 +236,9 @@ export default function Orders() {
                                         </td>
                                     </tr>
                                 ) : orders.map((o) => {
-                                    const status = statusConfig(o.status)
-                                    const StatusIcon = status.icon
-                                    const payment = paymentConfig(o.payment_status)
-                                    const PaymentIcon = payment.icon
+                                    const next = nextStage(o.status)
+                                    const StageIcon = stageIcon(o.status)
+                                    const nextIcon = next === 'processing' ? RefreshCw : next === 'delivering' ? Truck : CheckCircle
                                     return (
                                         <tr key={o.id} className="hover:bg-white/40 transition-colors">
                                             <td className="px-5 py-3">
@@ -275,19 +256,19 @@ export default function Orders() {
                                             <td className="px-5 py-3">
                                                 <div className="flex items-center gap-1">
                                                     <DollarSign className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span className="font-semibold text-gray-800">{currencySymbol}{Number(o.total).toFixed(2)}</span>
+                                                    <span className="font-semibold text-gray-800">${Number(o.total).toFixed(2)}</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3">
-                                                <span className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 w-fit ${status.color}`}>
-                                                    <StatusIcon className="w-3 h-3" />
-                                                    {status.label}
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 w-fit ${stageColor(o.status)}`}>
+                                                    <StageIcon className="w-3 h-3" />
+                                                    {o.status}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-3">
-                                                <span className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 w-fit ${payment.color}`}>
-                                                    <PaymentIcon className="w-3 h-3" />
-                                                    {payment.label}
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 w-fit ${paymentColor(o.payment_status)}`}>
+                                                    {o.payment_status === 'paid' ? <CheckCircle className="w-3 h-3" /> : o.payment_status === 'unpaid' ? <XCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                                                    {o.payment_status}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-3">
@@ -297,30 +278,40 @@ export default function Orders() {
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3">
-                                                <div className="flex gap-1">
-                                                    {o.status !== 'completed' && o.status !== 'cancelled' && (
+                                                <div className="flex gap-1 flex-wrap">
+                                                    {next && (
                                                         <button
-                                                            onClick={() => handleUpdateStatus(o.id, 'completed', 'paid')}
-                                                            className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition"
-                                                            title="Complete Order"
+                                                            onClick={() => handleStatusUpdate(o.id, next, o.payment_status)}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-md text-xs font-medium transition"
+                                                            title={nextStageLabel(o.status)}
                                                         >
-                                                            <CheckCircle className="w-4 h-4" />
+                                                            <Send className="w-3 h-3" />
+                                                            {nextStageLabel(o.status)}
+                                                        </button>
+                                                    )}
+                                                    {o.status !== 'cancelled' && o.status !== 'completed' && (
+                                                        <button
+                                                            onClick={() => handleStatusUpdate(o.id, 'cancelled', o.payment_status)}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-600 hover:bg-red-200 rounded-md text-xs font-medium transition"
+                                                        >
+                                                            <XCircle className="w-3 h-3" />
+                                                            Cancel
                                                         </button>
                                                     )}
                                                     <button
                                                         onClick={() => handleExportPdf(o.id, o.order_number)}
                                                         disabled={pdfLoading === o.id}
-                                                        className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition disabled:opacity-50"
-                                                        title="Export PDF"
+                                                        className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-600 hover:bg-purple-200 rounded-md text-xs font-medium transition disabled:opacity-50"
                                                     >
-                                                        <Printer className="w-4 h-4" />
+                                                        <FileDown className="w-3 h-3" />
+                                                        {pdfLoading === o.id ? '...' : 'PDF'}
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(o.id)}
-                                                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
-                                                        title="Delete Order"
+                                                        className="p-1 text-red-400 hover:text-red-600 transition"
+                                                        title="Delete"
                                                     >
-                                                        <Trash2 className="w-4 h-4" />
+                                                        <Trash2 className="w-3.5 h-3.5" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -390,7 +381,7 @@ export default function Orders() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <DollarSign className="w-3.5 h-3.5 inline mr-1" />
-                                            Tax
+                                            Tax ($)
                                         </label>
                                         <input type="number" min="0" step="0.01" value={form.tax}
                                             onChange={e => setForm({...form, tax: e.target.value})}
@@ -399,7 +390,7 @@ export default function Orders() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <TrendingUp className="w-3.5 h-3.5 inline mr-1" />
-                                            Discount
+                                            Discount ($)
                                         </label>
                                         <input type="number" min="0" step="0.01" value={form.discount}
                                             onChange={e => setForm({...form, discount: e.target.value})}
@@ -424,9 +415,7 @@ export default function Orders() {
                                                 <select value={item.product_id} onChange={e => updateItem(index, 'product_id', e.target.value)}
                                                     className="col-span-2 border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50">
                                                     <option value="">Select Product</option>
-                                                    {products.map(p => (
-                                                        <option key={p.id} value={p.id}>{p.name} ({currencySymbol}{Number(p.price).toFixed(2)})</option>
-                                                    ))}
+                                                    {products.map(p => <option key={p.id} value={p.id}>{p.name} (${Number(p.price).toFixed(2)})</option>)}
                                                 </select>
                                                 <input type="number" min="1" value={item.quantity}
                                                     onChange={e => updateItem(index, 'quantity', e.target.value)}
@@ -438,8 +427,7 @@ export default function Orders() {
                                                         placeholder="Price"
                                                         className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" />
                                                     {form.items.length > 1 && (
-                                                        <button type="button" onClick={() => removeItem(index)}
-                                                            className="text-red-400 hover:text-red-600">
+                                                        <button type="button" onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600">
                                                             <XCircle className="w-5 h-5" />
                                                         </button>
                                                     )}
@@ -450,22 +438,10 @@ export default function Orders() {
                                 </div>
 
                                 <div className="bg-emerald-50 rounded-md p-4 text-sm space-y-1 border border-emerald-200">
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>Subtotal</span>
-                                        <span>{currencySymbol}{getSubtotal().toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>Tax</span>
-                                        <span>{currencySymbol}{Number(form.tax).toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>Discount</span>
-                                        <span>-{currencySymbol}{Number(form.discount).toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between font-bold text-gray-800 border-t border-emerald-200 pt-2 mt-1">
-                                        <span>Total</span>
-                                        <span className="text-emerald-700">{currencySymbol}{getTotal().toFixed(2)}</span>
-                                    </div>
+                                    <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>${getSubtotal().toFixed(2)}</span></div>
+                                    <div className="flex justify-between text-gray-600"><span>Tax</span><span>${Number(form.tax).toFixed(2)}</span></div>
+                                    <div className="flex justify-between text-gray-600"><span>Discount</span><span>-${Number(form.discount).toFixed(2)}</span></div>
+                                    <div className="flex justify-between font-bold text-gray-800 border-t border-emerald-200 pt-2 mt-1"><span>Total</span><span className="text-emerald-700">${getTotal().toFixed(2)}</span></div>
                                 </div>
 
                                 <div>
@@ -483,8 +459,7 @@ export default function Orders() {
                                     <button type="submit" className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 rounded-md text-sm transition">
                                         Create Order
                                     </button>
-                                    <button type="button" onClick={() => setShowModal(false)}
-                                        className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition">
+                                    <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition">
                                         Cancel
                                     </button>
                                 </div>

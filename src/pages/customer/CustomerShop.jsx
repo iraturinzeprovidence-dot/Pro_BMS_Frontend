@@ -554,52 +554,34 @@ export default function CustomerShop() {
                                                         ))}
                                                     </div>
                                                 </div>
-
-                                                {/* Delivery Status Timeline */}
-                                                <div className="p-5 pt-0">
-                                                    <div className="mt-3 pt-3 border-t border-gray-100">
-                                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Delivery Status</p>
-                                                        <div className="flex items-center">
-                                                            {[
-                                                                { label: 'Order Placed', status: 'pending', step: 1 },
-                                                                { label: 'Processing', status: 'processing', step: 2 },
-                                                                { label: 'On the Way', status: 'processing', step: 3 },
-                                                                { label: 'Delivered', status: 'completed', step: 4 },
-                                                            ].map((step, i, arr) => {
-                                                                let isCompleted = false
-                                                                if (o.status === 'completed') {
-                                                                    isCompleted = true
-                                                                } else if (o.status === 'processing') {
-                                                                    isCompleted = step.step <= 2
-                                                                } else if (o.status === 'pending') {
-                                                                    isCompleted = step.step === 1
-                                                                } else {
-                                                                    isCompleted = false
-                                                                }
-                                                                
-                                                                return (
-                                                                    <div key={i} className="flex items-center flex-1">
-                                                                        <div className="flex flex-col items-center">
-                                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                                                                                isCompleted ? 'bg-emerald-600 text-white shadow-md' : 'bg-gray-200 text-gray-500'
-                                                                            }`}>
-                                                                                {isCompleted ? <CheckCircle className="w-4 h-4" /> : step.step}
-                                                                            </div>
-                                                                            <p className={`text-xs mt-1 text-center font-medium ${isCompleted ? 'text-emerald-700' : 'text-gray-400'}`}>
-                                                                                {step.label}
-                                                                            </p>
-                                                                        </div>
-                                                                        {i < arr.length - 1 && (
-                                                                            <div className={`h-0.5 flex-1 mx-2 mb-5 transition-all ${
-                                                                                isCompleted ? 'bg-emerald-600' : 'bg-gray-200'
-                                                                            }`} />
-                                                                        )}
-                                                                    </div>
-                                                                )
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                </div>
+{/* Delivery Status Timeline */}
+<div className="mt-4 pt-4 border-t border-gray-50">
+    <div className="flex items-center">
+        {[
+            { label: 'Order\nPlaced',   match: ['pending', 'processing', 'delivering', 'completed'] },
+            { label: 'Processing',      match: ['processing', 'delivering', 'completed']             },
+            { label: 'On the\nWay',     match: ['delivering', 'completed']                           },
+            { label: 'Delivered',       match: ['completed']                                         },
+        ].map((step, i, arr) => {
+            const done = step.match.includes(o.status)
+            return (
+                <div key={i} className="flex items-center flex-1">
+                    <div className="flex flex-col items-center">
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ${done ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                            {done ? '✓' : i + 1}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 text-center w-16 leading-tight whitespace-pre-line">
+                            {step.label}
+                        </p>
+                    </div>
+                    {i < arr.length - 1 && (
+                        <div className={`h-0.5 flex-1 mb-5 transition ${done ? 'bg-blue-600' : 'bg-gray-200'}`} />
+                    )}
+                </div>
+            )
+        })}
+    </div>
+</div>
                                             </div>
                                         )
                                     })}
