@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LogIn, Mail, Lock, Eye, EyeOff, Building2, ArrowRight, Briefcase, UserPlus } from 'lucide-react'
+import { LogIn, Mail, Lock, Eye, EyeOff, Building2, ArrowRight, Briefcase, KeyRound } from 'lucide-react'
 
 export default function Login() {
     const { login }               = useAuth()
@@ -138,6 +138,16 @@ export default function Login() {
                                     <Briefcase className="w-3 h-3" />
                                 </a>
                             </p>
+                            {/* Forgot Password Link */}
+                            <div className="pt-2">
+                                <Link 
+                                    to="/forgot-password" 
+                                    className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-200"
+                                >
+                                    <KeyRound className="w-3 h-3" />
+                                    Forgot password?
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

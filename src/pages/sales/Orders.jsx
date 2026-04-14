@@ -313,6 +313,20 @@ export default function Orders() {
                                                     >
                                                         <Trash2 className="w-3.5 h-3.5" />
                                                     </button>
+                                                    {o.payment_status !== 'paid' && o.status !== 'cancelled' && (
+    <button
+        onClick={async () => {
+            await salesApi.markOrderPaid(o.id)
+            fetchOrders()
+        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 text-xs font-medium rounded-md transition-all duration-200 border border-emerald-200 hover:border-emerald-300 shadow-sm hover:shadow"
+    >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Mark Paid
+    </button>
+)}
                                                 </div>
                                             </td>
                                         </tr>

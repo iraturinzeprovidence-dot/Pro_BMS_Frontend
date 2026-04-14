@@ -26,6 +26,8 @@ import JobApplication    from './pages/public/JobApplication'
 import CustomerRegister  from './pages/public/CustomerRegister'
 import ProfileSettings from './pages/profile/ProfileSettings'
 import CustomerShop from './pages/customer/CustomerShop'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword  from './pages/ResetPassword'
 
 function PrivateRoute({ children, role, permission }) {
     const { user, loading } = useAuth()
@@ -87,6 +89,8 @@ function App() {
         <CustomerShop />
     </CustomerShopRoute>
 } />
+<Route path="/forgot-password"  element={<ForgotPassword />} />
+<Route path="/reset-password"   element={<ResetPassword />}  />
 
                 {/* HR */}
                 <Route path="/hr/dashboard"  element={<PrivateRoute><HRDashboard /></PrivateRoute>} />

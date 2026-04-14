@@ -18,4 +18,5 @@ export const salesApi = {
     updateOrder:  (id, data) => api.put(`/sales/orders/${id}`, data),
     deleteOrder:  (id)       => api.delete(`/sales/orders/${id}`),
     getOrder:     (id)       => api.get(`/sales/orders/${id}`),
+    markOrderPaid: (id) => api.post(`/sales/orders/${id}/mark-paid`),
 }
