@@ -134,7 +134,7 @@ export default function CustomerRegister() {
                                 <input
                                     type="text" required value={form.name}
                                     onChange={e => setForm({...form, name: e.target.value})}
-                                    placeholder="John Doe"
+                                    placeholder="Names"
                                     className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                 />
                             </div>
@@ -147,7 +147,7 @@ export default function CustomerRegister() {
                                 <input
                                     type="email" required value={form.email}
                                     onChange={e => setForm({...form, email: e.target.value})}
-                                    placeholder="john@example.com"
+                                    placeholder="me@example.com"
                                     className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                 />
                             </div>
@@ -161,7 +161,7 @@ export default function CustomerRegister() {
                                     <input
                                         type="text" value={form.phone}
                                         onChange={e => setForm({...form, phone: e.target.value})}
-                                        placeholder="+1234567890"
+                                        placeholder="+250 70000000"
                                         className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                     />
                                 </div>
@@ -173,7 +173,7 @@ export default function CustomerRegister() {
                                     <input
                                         type="text" value={form.city}
                                         onChange={e => setForm({...form, city: e.target.value})}
-                                        placeholder="New York"
+                                        placeholder="City"
                                         className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                     />
                                 </div>
@@ -187,7 +187,7 @@ export default function CustomerRegister() {
                                 <input
                                     type="text" value={form.country}
                                     onChange={e => setForm({...form, country: e.target.value})}
-                                    placeholder="United States"
+                                    placeholder="Country"
                                     className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                 />
                             </div>
