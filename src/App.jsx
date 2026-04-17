@@ -28,6 +28,7 @@ import ProfileSettings from './pages/profile/ProfileSettings'
 import CustomerShop from './pages/customer/CustomerShop'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword  from './pages/ResetPassword'
+import Homepage from './pages/public/Homepage'
 
 function PrivateRoute({ children, role, permission }) {
     const { user, loading } = useAuth()
@@ -59,6 +60,9 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/"         element={<Homepage />} />
+                <Route path="/home"     element={<Homepage />} />
+                
                 <Route path="/login" element={<Login />} />
 
                 <Route path="/admin/dashboard"    element={<PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>} />

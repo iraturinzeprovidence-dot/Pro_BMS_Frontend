@@ -36,24 +36,31 @@ export const AuthProvider = ({ children }) => {
         }
     }, [])
 
-    const login = async (email, password) => {
-        const response        = await api.post('/auth/login', { email, password })
-        const { token, user } = response.data
-        localStorage.setItem('token', token)
-        localStorage.setItem('user', JSON.stringify(user))
-        setUser(user)
+const login = async (email, password) => {
+    const response        = await api.post('/auth/login', { email, password })
+    const { token, user } = response.data
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    setUser(user)
 
-        if (user.role === 'employee') {
-            try {
-                const r = await api.get('/hr/my-profile')
-                setProfile(r.data)
-            } catch {
-                setProfile(null)
-            }
-        }
-
-        return user
+    // Transfer guest cart to logged in session
+    const guestCart = localStorage.getItem('guest_cart')
+    if (guestCart && user.role === 'customer') {
+        localStorage.setItem('customer_cart', guestCart)
+        localStorage.removeItem('guest_cart')
     }
+
+    if (user.role === 'employee') {
+        try {
+            const r = await api.get('/hr/my-profile')
+            setProfile(r.data)
+        } catch {
+            setProfile(null)
+        }
+    }
+
+    return user
+}
 
     const logout = async () => {
         try { await api.post('/auth/logout') } catch {}
