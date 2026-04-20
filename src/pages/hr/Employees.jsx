@@ -44,8 +44,8 @@ export default function Employees() {
     const [employees, setEmployees]     = useState([])
     const [search, setSearch]           = useState('')
     const [loading, setLoading]         = useState(true)
-    const [showModal, setShowModal]     = useState(false)
-    const [showPermModal, setShowPermModal] = useState(false)
+    const [showDrawer, setShowDrawer]   = useState(false)
+    const [showPermDrawer, setShowPermDrawer] = useState(false)
     const [editing, setEditing]         = useState(null)
     const [permEmployee, setPermEmployee] = useState(null)
     const [error, setError]             = useState('')
@@ -76,7 +76,7 @@ export default function Employees() {
             permissions: [],
         })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const openEdit = (e) => {
@@ -95,13 +95,13 @@ export default function Employees() {
             permissions: e.permissions ?? [],
         })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const openPermissions = (e) => {
         setPermEmployee(e)
         setTempPermissions(e.permissions ?? [])
-        setShowPermModal(true)
+        setShowPermDrawer(true)
     }
 
     const togglePermission = (key) => {
@@ -118,7 +118,7 @@ export default function Employees() {
                 ...permEmployee,
                 permissions: tempPermissions,
             })
-            setShowPermModal(false)
+            setShowPermDrawer(false)
             fetchEmployees()
         } catch (err) {
             alert('Failed to save permissions')
@@ -134,7 +134,7 @@ export default function Employees() {
             } else {
                 await hrApi.createEmployee(form)
             }
-            setShowModal(false)
+            setShowDrawer(false)
             fetchEmployees()
         } catch (err) {
             setError(err.response?.data?.message ?? 'Something went wrong')
@@ -196,14 +196,14 @@ export default function Employees() {
                         <button
                             onClick={handleExportPdf}
                             disabled={pdfLoading}
-                            className="bg-purple-700 hover:bg-purple-800 text-white text-base font-medium px-6 py-3 rounded-md transition-all duration-200 flex items-center gap-2 shadow-md disabled:opacity-50"
+                            className="bg-purple-700 hover:bg-purple-800 text-white text-base font-medium px-6 py-3 rounded-[5px] transition-all duration-200 flex items-center gap-2 shadow-md disabled:opacity-50"
                         >
                             <Download className="w-5 h-5" />
                             {pdfLoading ? 'Generating...' : 'Export PDF'}
                         </button>
                         <button
                             onClick={openCreate}
-                            className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-6 py-3 rounded-md transition-all duration-200 flex items-center gap-2 shadow-md"
+                            className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-6 py-3 rounded-[5px] transition-all duration-200 flex items-center gap-2 shadow-md"
                         >
                             <PlusCircle className="w-5 h-5" />
                             Add Employee
@@ -220,13 +220,13 @@ export default function Employees() {
                             placeholder="Search by name, email or department..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            className="w-full pl-9 pr-4 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-[5px] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         />
                     </div>
                 </div>
 
                 {/* Employees Table */}
-                <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-md rounded-[5px] border border-gray-200 shadow-lg overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead className="bg-emerald-50/50">
@@ -287,7 +287,7 @@ export default function Employees() {
                                                     {(e.permissions ?? []).length === 0 ? (
                                                         <span className="text-xs text-gray-400">No access</span>
                                                     ) : (e.permissions ?? []).map(p => (
-                                                        <span key={p} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full capitalize flex items-center gap-1">
+                                                        <span key={p} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-[5px] capitalize flex items-center gap-1">
                                                             {p === 'inventory' && <Package className="w-2.5 h-2.5" />}
                                                             {p === 'sales' && <TrendingUp className="w-2.5 h-2.5" />}
                                                             {p === 'purchasing' && <ShoppingCart className="w-2.5 h-2.5" />}
@@ -301,12 +301,11 @@ export default function Employees() {
                                             </td>
                                             <td className="px-5 py-3">
                                                 <div className="flex items-center gap-1">
-                                                    <DollarSign className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span className="text-gray-800 font-medium">{Number(e.salary).toLocaleString()}</span>
+                                                    <span className="text-gray-800 font-medium">{Number(e.salary).toLocaleString()} Frw</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3">
-                                                <span className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 w-fit ${status.color}`}>
+                                                <span className={`text-xs px-2 py-1 rounded-[5px] font-medium flex items-center gap-1 w-fit ${status.color}`}>
                                                     <StatusIcon className="w-3 h-3" />
                                                     {e.status}
                                                 </span>
@@ -315,21 +314,21 @@ export default function Employees() {
                                                 <div className="flex gap-1">
                                                     <button 
                                                         onClick={() => openEdit(e)} 
-                                                        className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition"
+                                                        className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-[5px] transition"
                                                         title="Edit"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </button>
                                                     <button 
                                                         onClick={() => openPermissions(e)} 
-                                                        className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition"
+                                                        className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-[5px] transition"
                                                         title="Permissions"
                                                     >
                                                         <Key className="w-4 h-4" />
                                                     </button>
                                                     <button 
                                                         onClick={() => handleDelete(e.id)} 
-                                                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                                                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-[5px] transition"
                                                         title="Delete"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -344,58 +343,140 @@ export default function Employees() {
                     </div>
                 </div>
 
-                {/* Add/Edit Employee Modal */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
-                        <div className="bg-white/95 backdrop-blur-md rounded-md shadow-xl w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
-                            <div className="flex justify-between items-center px-8 py-5 border-b border-gray-200 sticky top-0 bg-white/95 backdrop-blur-md z-10">
-                                <h3 className="text-xl font-bold text-black">
-                                    {editing ? 'Edit Employee' : 'Add New Employee'}
+                {/* ===== RIGHT SIDE DRAWER - ADD/EDIT EMPLOYEE ===== */}
+                {showDrawer && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="fixed inset-0 bg-black/40" onClick={() => setShowDrawer(false)} />
+                        <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
+                                <h3 className="font-bold text-gray-800 text-xl flex items-center gap-2">
+                                    {editing ? (
+                                        <>
+                                            <Edit className="w-6 h-6 text-emerald-600" />
+                                            Edit Employee
+                                        </>
+                                    ) : (
+                                        <>
+                                            <PlusCircle className="w-6 h-6 text-emerald-600" />
+                                            Add New Employee
+                                        </>
+                                    )}
                                 </h3>
-                                <button 
-                                    onClick={() => setShowModal(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100 transition"
+                                <button
+                                    onClick={() => setShowDrawer(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-[5px] hover:bg-gray-100 text-gray-500 transition-all"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            
-                            {error && (
-                                <div className="mx-8 mt-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-md flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4" />
-                                    {error}
-                                </div>
-                            )}
-                            
-                            <form onSubmit={handleSubmit} className="p-8 space-y-5">
-                                <div className="grid grid-cols-2 gap-5">
-                                    {[
-                                        { label: 'First Name', key: 'first_name', type: 'text', required: true, icon: User },
-                                        { label: 'Last Name', key: 'last_name', type: 'text', required: true, icon: User },
-                                        { label: 'Email', key: 'email', type: 'email', required: true, icon: Mail },
-                                        { label: 'Phone', key: 'phone', type: 'text', required: false, icon: Phone },
-                                        { label: 'Department', key: 'department', type: 'text', required: true, icon: Building2 },
-                                        { label: 'Job Title', key: 'job_title', type: 'text', required: true, icon: Briefcase },
-                                        { label: 'Salary', key: 'salary', type: 'number', required: true, icon: DollarSign },
-                                        { label: 'Hire Date', key: 'hire_date', type: 'date', required: true, icon: Calendar },
-                                    ].map(field => {
-                                        const Icon = field.icon
-                                        return (
-                                            <div key={field.key}>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    <Icon className="w-3.5 h-3.5 inline mr-1" />
-                                                    {field.label}
-                                                </label>
-                                                <input
-                                                    type={field.type}
-                                                    required={field.required}
-                                                    value={form[field.key]}
-                                                    onChange={e => setForm({...form, [field.key]: e.target.value})}
-                                                    className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
-                                                />
-                                            </div>
-                                        )
-                                    })}
+
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
+                                {error && (
+                                    <div className="mb-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-[5px] flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {error}
+                                    </div>
+                                )}
+                                
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <User className="w-3.5 h-3.5 inline mr-1" />
+                                                First Name
+                                            </label>
+                                            <input
+                                                type="text" required value={form.first_name}
+                                                onChange={e => setForm({...form, first_name: e.target.value})}
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <User className="w-3.5 h-3.5 inline mr-1" />
+                                                Last Name
+                                            </label>
+                                            <input
+                                                type="text" required value={form.last_name}
+                                                onChange={e => setForm({...form, last_name: e.target.value})}
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Mail className="w-3.5 h-3.5 inline mr-1" />
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email" required value={form.email}
+                                            onChange={e => setForm({...form, email: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Phone className="w-3.5 h-3.5 inline mr-1" />
+                                            Phone
+                                        </label>
+                                        <input
+                                            type="text" value={form.phone}
+                                            onChange={e => setForm({...form, phone: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Building2 className="w-3.5 h-3.5 inline mr-1" />
+                                            Department
+                                        </label>
+                                        <input
+                                            type="text" required value={form.department}
+                                            onChange={e => setForm({...form, department: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Briefcase className="w-3.5 h-3.5 inline mr-1" />
+                                            Job Title
+                                        </label>
+                                        <input
+                                            type="text" required value={form.job_title}
+                                            onChange={e => setForm({...form, job_title: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <DollarSign className="w-3.5 h-3.5 inline mr-1" />
+                                                Salary (Frw)
+                                            </label>
+                                            <input
+                                                type="number" required min="0" value={form.salary}
+                                                onChange={e => setForm({...form, salary: e.target.value})}
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <Calendar className="w-3.5 h-3.5 inline mr-1" />
+                                                Hire Date
+                                            </label>
+                                            <input
+                                                type="date" required value={form.hire_date}
+                                                onChange={e => setForm({...form, hire_date: e.target.value})}
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <UserCog className="w-3.5 h-3.5 inline mr-1" />
@@ -404,142 +485,148 @@ export default function Employees() {
                                         <select
                                             value={form.status}
                                             onChange={e => setForm({...form, status: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                         >
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
                                             <option value="terminated">Terminated</option>
                                         </select>
                                     </div>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <Shield className="w-3.5 h-3.5 inline mr-1" />
-                                        Module Permissions
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {ALL_PERMISSIONS.map(p => {
-                                            const Icon = p.icon
-                                            return (
-                                                <label key={p.key} className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer transition ${
-                                                    form.permissions.includes(p.key)
-                                                        ? 'border-emerald-300 bg-emerald-50'
-                                                        : 'border-gray-200 hover:bg-gray-50'
-                                                }`}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={form.permissions.includes(p.key)}
-                                                        onChange={() => setForm({
-                                                            ...form,
-                                                            permissions: form.permissions.includes(p.key)
-                                                                ? form.permissions.filter(x => x !== p.key)
-                                                                : [...form.permissions, p.key]
-                                                        })}
-                                                        className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                                    />
-                                                    <Icon className="w-3.5 h-3.5 text-gray-500" />
-                                                    <span className="text-xs text-gray-700">{p.label}</span>
-                                                </label>
-                                            )
-                                        })}
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Shield className="w-3.5 h-3.5 inline mr-1" />
+                                            Module Permissions
+                                        </label>
+                                        <div className="space-y-2">
+                                            {ALL_PERMISSIONS.map(p => {
+                                                const Icon = p.icon
+                                                return (
+                                                    <label key={p.key} className={`flex items-center gap-2 p-2 border rounded-[5px] cursor-pointer transition ${
+                                                        form.permissions.includes(p.key)
+                                                            ? 'border-emerald-300 bg-emerald-50'
+                                                            : 'border-gray-200 hover:bg-gray-50'
+                                                    }`}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={form.permissions.includes(p.key)}
+                                                            onChange={() => setForm({
+                                                                ...form,
+                                                                permissions: form.permissions.includes(p.key)
+                                                                    ? form.permissions.filter(x => x !== p.key)
+                                                                    : [...form.permissions, p.key]
+                                                            })}
+                                                            className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                        />
+                                                        <Icon className="w-3.5 h-3.5 text-gray-500" />
+                                                        <span className="text-xs text-gray-700">{p.label}</span>
+                                                    </label>
+                                                )
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <MapPin className="w-3.5 h-3.5 inline mr-1" />
-                                        Address
-                                    </label>
-                                    <textarea
-                                        rows="2" value={form.address}
-                                        onChange={e => setForm({...form, address: e.target.value})}
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
-                                        placeholder="Optional address..."
-                                    />
-                                </div>
-                                
-                                <div className="flex gap-3 pt-4">
-                                    <button type="submit" className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 rounded-md text-sm transition">
-                                        {editing ? 'Update Employee' : 'Create Employee'}
-                                    </button>
-                                    <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <MapPin className="w-3.5 h-3.5 inline mr-1" />
+                                            Address
+                                        </label>
+                                        <textarea
+                                            rows="3" value={form.address}
+                                            onChange={e => setForm({...form, address: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            placeholder="Optional address..."
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4 pb-6">
+                                        <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-[5px] text-sm transition-all duration-200 shadow-md hover:shadow-lg">
+                                            {editing ? 'Update Employee' : 'Create Employee'}
+                                        </button>
+                                        <button type="button" onClick={() => setShowDrawer(false)} className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-[5px] text-sm hover:bg-gray-50 transition-all duration-200">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 )}
 
-                {/* Permissions Modal */}
-                {showPermModal && permEmployee && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
-                        <div className="bg-white/95 backdrop-blur-md rounded-md shadow-xl w-full max-w-md mx-auto">
-                            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-black">Module Permissions</h3>
-                                <button 
-                                    onClick={() => setShowPermModal(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100 transition"
+                {/* ===== RIGHT SIDE DRAWER - PERMISSIONS ===== */}
+                {showPermDrawer && permEmployee && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="fixed inset-0 bg-black/40" onClick={() => setShowPermDrawer(false)} />
+                        <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
+                                <h3 className="font-bold text-gray-800 text-xl flex items-center gap-2">
+                                    <Key className="w-6 h-6 text-emerald-600" />
+                                    Module Permissions
+                                </h3>
+                                <button
+                                    onClick={() => setShowPermDrawer(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-[5px] hover:bg-gray-100 text-gray-500 transition-all"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            
-                            <div className="px-6 pt-4 pb-2">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <User className="w-4 h-4 text-gray-500" />
-                                    <p className="font-semibold text-gray-800">
-                                        {permEmployee.first_name} {permEmployee.last_name}
+
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
+                                <div className="mb-5 p-4 bg-gray-50 rounded-[5px] border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <User className="w-4 h-4 text-gray-500" />
+                                        <p className="font-semibold text-gray-800">
+                                            {permEmployee.first_name} {permEmployee.last_name}
+                                        </p>
+                                    </div>
+                                    <p className="text-gray-500 text-sm flex items-center gap-1">
+                                        <Briefcase className="w-3.5 h-3.5" />
+                                        {permEmployee.job_title}
                                     </p>
                                 </div>
-                                <p className="text-gray-500 text-sm flex items-center gap-1">
-                                    <Briefcase className="w-3.5 h-3.5" />
-                                    {permEmployee.job_title}
-                                </p>
-                            </div>
 
-                            <div className="p-6 space-y-3">
-                                {ALL_PERMISSIONS.map(p => {
-                                    const Icon = p.icon
-                                    return (
-                                        <label
-                                            key={p.key}
-                                            className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition ${
-                                                tempPermissions.includes(p.key)
-                                                    ? 'border-emerald-300 bg-emerald-50'
-                                                    : 'border-gray-200 hover:bg-gray-50'
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Icon className="w-4 h-4 text-gray-500" />
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-800">{p.label}</p>
-                                                    <p className="text-xs text-gray-500">{p.desc}</p>
+                                <div className="space-y-3">
+                                    {ALL_PERMISSIONS.map(p => {
+                                        const Icon = p.icon
+                                        return (
+                                            <label
+                                                key={p.key}
+                                                className={`flex items-center justify-between p-3 border rounded-[5px] cursor-pointer transition ${
+                                                    tempPermissions.includes(p.key)
+                                                        ? 'border-emerald-300 bg-emerald-50'
+                                                        : 'border-gray-200 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <Icon className="w-4 h-4 text-gray-500" />
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-800">{p.label}</p>
+                                                        <p className="text-xs text-gray-500">{p.desc}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                checked={tempPermissions.includes(p.key)}
-                                                onChange={() => togglePermission(p.key)}
-                                                className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                            />
-                                        </label>
-                                    )
-                                })}
+                                                <input
+                                                    type="checkbox"
+                                                    checked={tempPermissions.includes(p.key)}
+                                                    onChange={() => togglePermission(p.key)}
+                                                    className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                />
+                                            </label>
+                                        )
+                                    })}
+                                </div>
                             </div>
 
                             <div className="flex gap-3 p-6 pt-2 border-t border-gray-200">
                                 <button
                                     onClick={savePermissions}
-                                    className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 rounded-md text-sm transition flex items-center justify-center gap-2"
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-[5px] text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                                 >
                                     <Shield className="w-4 h-4" />
                                     Save Permissions
                                 </button>
                                 <button
-                                    onClick={() => setShowPermModal(false)}
-                                    className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition"
+                                    onClick={() => setShowPermDrawer(false)}
+                                    className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-[5px] text-sm hover:bg-gray-50 transition-all duration-200"
                                 >
                                     Cancel
                                 </button>
@@ -548,6 +635,20 @@ export default function Employees() {
                     </div>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes slide-in-right {
+                    from {
+                        transform: translateX(100%);
+                    }
+                    to {
+                        transform: translateX(0);
+                    }
+                }
+                .animate-slide-in-right {
+                    animation: slide-in-right 0.3s ease-out;
+                }
+            `}</style>
         </div>
     )
 }

@@ -25,7 +25,7 @@ export default function Transactions() {
     const [search, setSearch]             = useState('')
     const [typeFilter, setTypeFilter]     = useState('')
     const [loading, setLoading]           = useState(true)
-    const [showModal, setShowModal]       = useState(false)
+    const [showDrawer, setShowDrawer]     = useState(false)
     const [editing, setEditing]           = useState(null)
     const [error, setError]               = useState('')
     const [pdfLoading, setPdfLoading]     = useState(false)
@@ -50,7 +50,7 @@ export default function Transactions() {
             description: '', date: new Date().toISOString().split('T')[0], payment_method: 'cash',
         })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const openEdit = (t) => {
@@ -60,7 +60,7 @@ export default function Transactions() {
             description: t.description ?? '', date: t.date, payment_method: t.payment_method,
         })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const handleSubmit = async (e) => {
@@ -72,7 +72,7 @@ export default function Transactions() {
             } else {
                 await accountingApi.createTransaction(form)
             }
-            setShowModal(false)
+            setShowDrawer(false)
             fetchTransactions()
         } catch (err) {
             setError(err.response?.data?.message ?? 'Something went wrong')
@@ -131,14 +131,14 @@ export default function Transactions() {
                         <button
                             onClick={handleExportPdf}
                             disabled={pdfLoading}
-                            className="bg-purple-700 hover:bg-purple-800 text-white text-base font-medium px-8 py-3 rounded-md transition-all duration-200 flex items-center gap-2 shadow-md disabled:opacity-50"
+                            className="bg-purple-700 hover:bg-purple-800 text-white text-base font-medium px-8 py-3 rounded-[5px] transition-all duration-200 flex items-center gap-2 shadow-md disabled:opacity-50"
                         >
                             <Download className="w-5 h-5" />
                             {pdfLoading ? 'Generating...' : 'Export PDF'}
                         </button>
                         <button
                             onClick={openCreate}
-                            className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-8 py-3 rounded-md transition-all duration-200 flex items-center gap-2 shadow-md"
+                            className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-8 py-3 rounded-[5px] transition-all duration-200 flex items-center gap-2 shadow-md"
                         >
                             <PlusCircle className="w-5 h-5" />
                             Add Transaction
@@ -148,7 +148,7 @@ export default function Transactions() {
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                    <div className="bg-white/80 backdrop-blur-md rounded-md p-4 border border-gray-200 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-[5px] p-4 border border-gray-200 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                                 <TrendingUp className="w-5 h-5 text-emerald-700" />
@@ -156,11 +156,11 @@ export default function Transactions() {
                             </div>
                         </div>
                         <p className="text-2xl font-bold text-emerald-700 mb-0.5">
-                            ${totalIncome.toFixed(2)}
+                            {totalIncome.toLocaleString()} Frw
                         </p>
                     </div>
 
-                    <div className="bg-white/80 backdrop-blur-md rounded-md p-4 border border-gray-200 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-[5px] p-4 border border-gray-200 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                                 <TrendingDown className="w-5 h-5 text-red-600" />
@@ -168,11 +168,11 @@ export default function Transactions() {
                             </div>
                         </div>
                         <p className="text-2xl font-bold text-red-600 mb-0.5">
-                            ${totalExpense.toFixed(2)}
+                            {totalExpense.toLocaleString()} Frw
                         </p>
                     </div>
 
-                    <div className="bg-white/80 backdrop-blur-md rounded-md p-4 border border-gray-200 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-[5px] p-4 border border-gray-200 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                                 <DollarSign className="w-5 h-5 text-blue-600" />
@@ -180,11 +180,11 @@ export default function Transactions() {
                             </div>
                         </div>
                         <p className={`text-2xl font-bold mb-0.5 ${(totalIncome - totalExpense) >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
-                            ${(totalIncome - totalExpense).toFixed(2)}
+                            {(totalIncome - totalExpense).toLocaleString()} Frw
                         </p>
                     </div>
                 </div>
-.
+
                 {/* Search and Filter */}
                 <div className="flex flex-wrap gap-4 mb-6">
                     <div className="relative flex-1 md:flex-initial md:w-96">
@@ -194,7 +194,7 @@ export default function Transactions() {
                             placeholder="Search transactions..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            className="w-full pl-9 pr-4 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-[5px] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         />
                     </div>
                     <div className="relative">
@@ -202,7 +202,7 @@ export default function Transactions() {
                         <select
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className="pl-9 pr-8 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            className="pl-9 pr-8 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-[5px] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         >
                             <option value="">All Types</option>
                             <option value="income">Income</option>
@@ -212,7 +212,7 @@ export default function Transactions() {
                 </div>
 
                 {/* Transactions Table */}
-                <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-md rounded-[5px] border border-gray-200 shadow-lg overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead className="bg-emerald-50/50">
@@ -243,7 +243,7 @@ export default function Transactions() {
                                     <tr key={t.id} className="hover:bg-white/40 transition-colors">
                                         <td className="px-5 py-3 text-gray-500 text-xs font-mono">{t.reference}</td>
                                         <td className="px-5 py-3">
-                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                            <span className={`text-xs px-2 py-1 rounded-[5px] font-medium ${
                                                 t.type === 'income' 
                                                     ? 'bg-emerald-100 text-emerald-700' 
                                                     : 'bg-red-100 text-red-700'
@@ -255,21 +255,21 @@ export default function Transactions() {
                                         <td className={`px-5 py-3 font-semibold ${
                                             t.type === 'income' ? 'text-emerald-700' : 'text-red-600'
                                         }`}>
-                                            {t.type === 'income' ? '+' : '-'}${Number(t.amount).toFixed(2)}
+                                            {t.type === 'income' ? '+' : '-'}{Number(t.amount).toLocaleString()} Frw
                                         </td>
                                         <td className="px-5 py-3 text-gray-500 capitalize">{t.payment_method.replace('_', ' ')}</td>
                                         <td className="px-5 py-3 text-gray-500">{new Date(t.date).toLocaleDateString()}</td>
                                         <td className="px-5 py-3 flex gap-2">
                                             <button 
                                                 onClick={() => openEdit(t)} 
-                                                className="p-1 text-emerald-600 hover:text-emerald-700 transition rounded"
+                                                className="p-1 text-emerald-600 hover:text-emerald-700 transition rounded-[5px]"
                                                 title="Edit"
                                             >
                                                 <Edit className="w-4 h-4" />
                                             </button>
                                             <button 
                                                 onClick={() => handleDelete(t.id)} 
-                                                className="p-1 text-red-500 hover:text-red-600 transition rounded"
+                                                className="p-1 text-red-500 hover:text-red-600 transition rounded-[5px]"
                                                 title="Delete"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -282,42 +282,56 @@ export default function Transactions() {
                     </div>
                 </div>
 
-                {/* Modal - Increased internal spacing from borders */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
-                        <div className="bg-white/95 backdrop-blur-md rounded-md shadow-xl w-full max-w-2xl mx-auto">
-                            <div className="flex justify-between items-center px-10 py-6 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-black">
-                                    {editing ? 'Edit Transaction' : 'Add New Transaction'}
+                {/* ===== RIGHT SIDE DRAWER - ADD/EDIT TRANSACTION ===== */}
+                {showDrawer && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="fixed inset-0 bg-black/40" onClick={() => setShowDrawer(false)} />
+                        <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
+                                <h3 className="font-bold text-gray-800 text-xl flex items-center gap-2">
+                                    {editing ? (
+                                        <>
+                                            <Edit className="w-6 h-6 text-emerald-600" />
+                                            Edit Transaction
+                                        </>
+                                    ) : (
+                                        <>
+                                            <PlusCircle className="w-6 h-6 text-emerald-600" />
+                                            Add New Transaction
+                                        </>
+                                    )}
                                 </h3>
-                                <button 
-                                    onClick={() => setShowModal(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100 transition"
+                                <button
+                                    onClick={() => setShowDrawer(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-[5px] hover:bg-gray-100 text-gray-500 transition-all"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            
-                            {error && (
-                                <div className="mx-10 mt-6 bg-red-50 border border-red-200 text-red-600 text-sm px-5 py-3 rounded-md flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4" />
-                                    {error}
-                                </div>
-                            )}
-                            
-                            <form onSubmit={handleSubmit} className="px-10 py-8 space-y-6">
-                                <div className="grid grid-cols-2 gap-6">
+
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
+                                {error && (
+                                    <div className="mb-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-[5px] flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {error}
+                                    </div>
+                                )}
+                                
+                                <form onSubmit={handleSubmit} className="space-y-5">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Type
+                                        </label>
                                         <select 
                                             value={form.type} 
                                             onChange={e => setForm({...form, type: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                         >
                                             <option value="income">Income</option>
                                             <option value="expense">Expense</option>
                                         </select>
                                     </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <Tag className="w-3.5 h-3.5 inline mr-1" />
@@ -329,11 +343,14 @@ export default function Transactions() {
                                             value={form.category}
                                             onChange={e => setForm({...form, category: e.target.value})}
                                             placeholder="e.g. Sales, Rent, Salary"
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
                                         />
                                     </div>
+
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Amount (Frw)
+                                        </label>
                                         <input 
                                             type="number" 
                                             required 
@@ -341,9 +358,10 @@ export default function Transactions() {
                                             step="0.01" 
                                             value={form.amount}
                                             onChange={e => setForm({...form, amount: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
                                         />
                                     </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <Calendar className="w-3.5 h-3.5 inline mr-1" />
@@ -354,10 +372,11 @@ export default function Transactions() {
                                             required 
                                             value={form.date}
                                             onChange={e => setForm({...form, date: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
                                         />
                                     </div>
-                                    <div className="col-span-2">
+
+                                    <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <CreditCard className="w-3.5 h-3.5 inline mr-1" />
                                             Payment Method
@@ -365,7 +384,7 @@ export default function Transactions() {
                                         <select 
                                             value={form.payment_method} 
                                             onChange={e => setForm({...form, payment_method: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                         >
                                             <option value="cash">Cash</option>
                                             <option value="bank_transfer">Bank Transfer</option>
@@ -373,40 +392,56 @@ export default function Transactions() {
                                             <option value="other">Other</option>
                                         </select>
                                     </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <FileSignature className="w-3.5 h-3.5 inline mr-1" />
-                                        Description
-                                    </label>
-                                    <textarea 
-                                        rows="3" 
-                                        value={form.description}
-                                        onChange={e => setForm({...form, description: e.target.value})}
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
-                                        placeholder="Optional description..."
-                                    />
-                                </div>
-                                <div className="flex gap-4 pt-6">
-                                    <button 
-                                        type="submit" 
-                                        className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-3 rounded-md text-sm transition"
-                                    >
-                                        {editing ? 'Update Transaction' : 'Add Transaction'}
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setShowModal(false)}
-                                        className="flex-1 border border-gray-300 text-gray-700 font-medium py-3 rounded-md text-sm hover:bg-gray-50 transition"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <FileSignature className="w-3.5 h-3.5 inline mr-1" />
+                                            Description
+                                        </label>
+                                        <textarea 
+                                            rows="3" 
+                                            value={form.description}
+                                            onChange={e => setForm({...form, description: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            placeholder="Optional description..."
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4 pb-6">
+                                        <button 
+                                            type="submit" 
+                                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-[5px] text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+                                        >
+                                            {editing ? 'Update Transaction' : 'Add Transaction'}
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowDrawer(false)}
+                                            className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-[5px] text-sm hover:bg-gray-50 transition-all duration-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes slide-in-right {
+                    from {
+                        transform: translateX(100%);
+                    }
+                    to {
+                        transform: translateX(0);
+                    }
+                }
+                .animate-slide-in-right {
+                    animation: slide-in-right 0.3s ease-out;
+                }
+            `}</style>
         </div>
     )
 }

@@ -23,8 +23,8 @@ export default function UserManagement() {
     const [stats, setStats]               = useState(null)
     const [search, setSearch]             = useState('')
     const [loading, setLoading]           = useState(true)
-    const [showModal, setShowModal]       = useState(false)
-    const [showPermModal, setShowPermModal] = useState(false)
+    const [showDrawer, setShowDrawer]     = useState(false)
+    const [showPermDrawer, setShowPermDrawer] = useState(false)
     const [editing, setEditing]           = useState(null)
     const [permUser, setPermUser]         = useState(null)
     const [permEmployee, setPermEmployee] = useState(null)
@@ -57,7 +57,7 @@ export default function UserManagement() {
         setForm({ name: '', email: '', password: '', role: 'employee' })
         setError('')
         setShowPassword(false)
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const openEdit = (u) => {
@@ -65,13 +65,13 @@ export default function UserManagement() {
         setForm({ name: u.name, email: u.email, password: '', role: u.role?.name ?? 'employee' })
         setError('')
         setShowPassword(false)
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const openPermissions = async (u) => {
         setPermUser(u)
         setTempPermissions([])
-        setShowPermModal(true)
+        setShowPermDrawer(true)
 
         try {
             const r = await hrApi.getEmployees({ search: u.email })
@@ -105,7 +105,7 @@ export default function UserManagement() {
                 ...permEmployee,
                 permissions: tempPermissions,
             })
-            setShowPermModal(false)
+            setShowPermDrawer(false)
             fetchUsers()
         } catch {
             alert('Failed to save permissions')
@@ -121,7 +121,7 @@ export default function UserManagement() {
             } else {
                 await usersApi.createUser(form)
             }
-            setShowModal(false)
+            setShowDrawer(false)
             fetchUsers()
             fetchStats()
         } catch (err) {
@@ -181,7 +181,7 @@ export default function UserManagement() {
                     </div>
                     <button
                         onClick={openCreate}
-                        className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-6 py-3 rounded-md transition-all duration-200 flex items-center gap-2 shadow-md"
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-8 py-3 rounded-[5px] transition-all duration-200 flex items-center gap-2 shadow-md"
                     >
                         <Plus className="w-5 h-5" />
                         Add User
@@ -190,35 +190,36 @@ export default function UserManagement() {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-6">
-                    <div className="bg-white/80 backdrop-blur-md rounded-md p-4 border border-gray-200 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-[5px] p-4 border border-gray-200 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                             <Users className="w-5 h-5 text-emerald-700" />
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Users</span>
                         </div>
                         <p className="text-2xl font-bold text-black">{stats?.total_users ?? 0}</p>
                     </div>
-                    <div className="bg-white/80 backdrop-blur-md rounded-md p-4 border border-gray-200 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-[5px] p-4 border border-gray-200 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                             <Shield className="w-5 h-5 text-purple-600" />
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Admins</span>
                         </div>
                         <p className="text-2xl font-bold text-black">{stats?.admin_users ?? 0}</p>
                     </div>
-                    <div className="bg-white/80 backdrop-blur-md rounded-md p-4 border border-gray-200 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-[5px] p-4 border border-gray-200 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                             <UserCog className="w-5 h-5 text-emerald-600" />
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Managers</span>
                         </div>
                         <p className="text-2xl font-bold text-black">{stats?.manager_users ?? 0}</p>
                     </div>
-                    <div className="bg-white/80 backdrop-blur-md rounded-md p-4 border border-gray-200 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-[5px] p-4 border border-gray-200 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                             <UserCheck className="w-5 h-5 text-gray-500" />
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Employees</span>
                         </div>
                         <p className="text-2xl font-bold text-black">{stats?.employee_users ?? 0}</p>
                     </div>
-                </div>.
+                </div>
+
                 {/* Search */}
                 <div className="mb-6">
                     <div className="relative md:w-96">
@@ -228,13 +229,13 @@ export default function UserManagement() {
                             placeholder="Search by name or email..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full border border-gray-200 rounded-md pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/80 backdrop-blur-md"
+                            className="w-full border border-gray-200 rounded-[5px] pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/80 backdrop-blur-md"
                         />
                     </div>
                 </div>
 
                 {/* Users Table */}
-                <div className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-md rounded-[5px] border border-gray-200 shadow-lg overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead className="bg-emerald-50/50">
@@ -283,7 +284,7 @@ export default function UserManagement() {
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3">
-                                                <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium capitalize ${role.color}`}>
+                                                <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-[5px] font-medium capitalize ${role.color}`}>
                                                     <RoleIcon className="w-3 h-3" />
                                                     {u.role?.name ?? 'No role'}
                                                 </span>
@@ -292,7 +293,7 @@ export default function UserManagement() {
                                                 {u.role?.name === 'employee' ? (
                                                     <button
                                                         onClick={() => openPermissions(u)}
-                                                        className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 font-medium border border-purple-200 px-2 py-1 rounded-md hover:bg-purple-50 transition"
+                                                        className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 font-medium border border-purple-200 px-2 py-1 rounded-[5px] hover:bg-purple-50 transition"
                                                     >
                                                         <Key className="w-3 h-3" />
                                                         Manage Access
@@ -311,14 +312,14 @@ export default function UserManagement() {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => openEdit(u)}
-                                                        className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition"
+                                                        className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-[5px] transition"
                                                         title="Edit"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(u.id)}
-                                                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                                                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-[5px] transition"
                                                         title="Delete"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -333,234 +334,250 @@ export default function UserManagement() {
                     </div>
                 </div>
 
-                {/* Add/Edit User Modal */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
-                        <div className="bg-white/95 backdrop-blur-md rounded-md shadow-xl w-full max-w-md mx-auto">
-                            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-black">
-                                    {editing ? 'Edit User' : 'Add New User'}
+                {/* ===== RIGHT SIDE DRAWER - ADD/EDIT USER ===== */}
+                {showDrawer && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="fixed inset-0 bg-black/40" onClick={() => setShowDrawer(false)} />
+                        <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
+                                <h3 className="font-bold text-gray-800 text-xl flex items-center gap-2">
+                                    {editing ? (
+                                        <>
+                                            <Edit className="w-6 h-6 text-emerald-600" />
+                                            Edit User
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Plus className="w-6 h-6 text-emerald-600" />
+                                            Add New User
+                                        </>
+                                    )}
                                 </h3>
-                                <button 
-                                    onClick={() => setShowModal(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100 transition"
+                                <button
+                                    onClick={() => setShowDrawer(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-[5px] hover:bg-gray-100 text-gray-500 transition-all"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            
-                            {error && (
-                                <div className="mx-6 mt-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded-md flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4" />
-                                    {error}
-                                </div>
-                            )}
-                            
-                            <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <User className="w-3.5 h-3.5 inline mr-1" />
-                                        Full Name
-                                    </label>
-                                    <input
-                                        type="text" required value={form.name}
-                                        onChange={e => setForm({...form, name: e.target.value})}
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
-                                    />
-                                </div>
+
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
+                                {error && (
+                                    <div className="mb-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-[5px] flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {error}
+                                    </div>
+                                )}
                                 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <Mail className="w-3.5 h-3.5 inline mr-1" />
-                                        Email
-                                    </label>
-                                    <input
-                                        type="email" required value={form.email}
-                                        onChange={e => setForm({...form, email: e.target.value})}
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <Key className="w-3.5 h-3.5 inline mr-1" />
-                                        {editing ? 'New Password (leave blank to keep current)' : 'Password'}
-                                    </label>
-                                    <div className="relative">
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <User className="w-3.5 h-3.5 inline mr-1" />
+                                            Full Name
+                                        </label>
                                         <input
-                                            type={showPassword ? 'text' : 'password'}
-                                            required={!editing}
-                                            value={form.password}
-                                            onChange={e => setForm({...form, password: e.target.value})}
-                                            placeholder={editing ? 'Leave blank to keep current' : 'Min 8 characters'}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            type="text" required value={form.name}
+                                            onChange={e => setForm({...form, name: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
                                         />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Mail className="w-3.5 h-3.5 inline mr-1" />
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email" required value={form.email}
+                                            onChange={e => setForm({...form, email: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Key className="w-3.5 h-3.5 inline mr-1" />
+                                            {editing ? 'New Password (leave blank to keep current)' : 'Password'}
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                required={!editing}
+                                                value={form.password}
+                                                onChange={e => setForm({...form, password: e.target.value})}
+                                                placeholder={editing ? 'Leave blank to keep current' : 'Min 8 characters'}
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            >
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Shield className="w-3.5 h-3.5 inline mr-1" />
+                                            Role
+                                        </label>
+                                        <select
+                                            value={form.role}
+                                            onChange={e => setForm({...form, role: e.target.value})}
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                        >
+                                            <option value="admin">Admin — Full access to everything</option>
+                                            <option value="manager">Manager — Sales, HR and Analytics</option>
+                                            <option value="employee">Employee — Based on assigned permissions</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Role explanation */}
+                                    <div className={`rounded-[5px] p-3 text-xs ${
+                                        form.role === 'admin'    ? 'bg-blue-50 text-blue-700 border border-blue-200'   :
+                                        form.role === 'manager'  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                        'bg-gray-50 text-gray-600 border border-gray-200'
+                                    }`}>
+                                        {form.role === 'admin'   && '🔐 Admin has full unrestricted access to all modules including user management.'}
+                                        {form.role === 'manager' && '👔 Manager has access to Sales, HR and Analytics dashboards.'}
+                                        {form.role === 'employee' && '👤 Employee access is controlled by module permissions. Set permissions after creating the account via the Manage Access button.'}
+                                    </div>
+
+                                    <div className="flex gap-3 pt-2 pb-6">
+                                        <button
+                                            type="submit"
+                                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-[5px] text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+                                        >
+                                            {editing ? 'Update User' : 'Create User'}
+                                        </button>
                                         <button
                                             type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            onClick={() => setShowDrawer(false)}
+                                            className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-[5px] text-sm hover:bg-gray-50 transition-all duration-200"
                                         >
-                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            Cancel
                                         </button>
                                     </div>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <Shield className="w-3.5 h-3.5 inline mr-1" />
-                                        Role
-                                    </label>
-                                    <select
-                                        value={form.role}
-                                        onChange={e => setForm({...form, role: e.target.value})}
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
-                                    >
-                                        <option value="admin">Admin — Full access to everything</option>
-                                        <option value="manager">Manager — Sales, HR and Analytics</option>
-                                        <option value="employee">Employee — Based on assigned permissions</option>
-                                    </select>
-                                </div>
-
-                                {/* Role explanation */}
-                                <div className={`rounded-md p-3 text-xs ${
-                                    form.role === 'admin'    ? 'bg-blue-50 text-blue-700 border border-blue-200'   :
-                                    form.role === 'manager'  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                                    'bg-gray-50 text-gray-600 border border-gray-200'
-                                }`}>
-                                    {form.role === 'admin'   && '🔐 Admin has full unrestricted access to all modules including user management.'}
-                                    {form.role === 'manager' && '👔 Manager has access to Sales, HR and Analytics dashboards.'}
-                                    {form.role === 'employee' && '👤 Employee access is controlled by module permissions. Set permissions after creating the account via the Manage Access button.'}
-                                </div>
-
-                                <div className="flex gap-3 pt-2">
-                                    <button
-                                        type="submit"
-                                        className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 rounded-md text-sm transition"
-                                    >
-                                        {editing ? 'Update User' : 'Create User'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowModal(false)}
-                                        className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 )}
 
-                {/* Permissions Modal */}
-                {showPermModal && permUser && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
-                        <div className="bg-white/95 backdrop-blur-md rounded-md shadow-xl w-full max-w-md mx-auto">
-                            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-200">
+                {/* ===== RIGHT SIDE DRAWER - PERMISSIONS ===== */}
+                {showPermDrawer && permUser && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="fixed inset-0 bg-black/40" onClick={() => setShowPermDrawer(false)} />
+                        <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                                         <User className="w-5 h-5 text-purple-700" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-black">Module Permissions</h3>
+                                        <h3 className="font-bold text-gray-800 text-lg">Module Permissions</h3>
                                         <p className="text-gray-500 text-xs">{permUser.name} — {permUser.email}</p>
                                     </div>
                                 </div>
                                 <button 
-                                    onClick={() => setShowPermModal(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100 transition"
+                                    onClick={() => setShowPermDrawer(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-[5px] hover:bg-gray-100 text-gray-500 transition-all"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
 
-                            {/* No employee profile warning */}
-                            {permEmployee === null && (
-                                <div className="mx-6 mt-5 bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                                    <p className="text-yellow-800 text-xs font-medium flex items-center gap-1">
-                                        <AlertCircle className="w-3.5 h-3.5" />
-                                        No employee profile linked
-                                    </p>
-                                    <p className="text-yellow-600 text-xs mt-1">
-                                        This user must be hired through HR → Candidates before permissions can be assigned.
-                                    </p>
-                                </div>
-                            )}
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
+                                {/* No employee profile warning */}
+                                {permEmployee === null && (
+                                    <div className="mb-5 bg-yellow-50 border border-yellow-200 rounded-[5px] p-4">
+                                        <p className="text-yellow-800 text-xs font-medium flex items-center gap-1">
+                                            <AlertCircle className="w-3.5 h-3.5" />
+                                            No employee profile linked
+                                        </p>
+                                        <p className="text-yellow-600 text-xs mt-1">
+                                            This user must be hired through HR → Candidates before permissions can be assigned.
+                                        </p>
+                                    </div>
+                                )}
 
-                            {permEmployee && (
-                                <div className="mx-6 mt-5 bg-emerald-50 border border-emerald-200 rounded-md p-3">
-                                    <p className="text-emerald-800 text-xs font-medium flex items-center gap-1">
-                                        <CheckCircle className="w-3.5 h-3.5" />
-                                        Linked to employee: {permEmployee.first_name} {permEmployee.last_name}
-                                    </p>
-                                    <p className="text-emerald-600 text-xs mt-1">
-                                        {permEmployee.job_title} — {permEmployee.department}
-                                    </p>
-                                </div>
-                            )}
+                                {permEmployee && (
+                                    <div className="mb-5 bg-emerald-50 border border-emerald-200 rounded-[5px] p-4">
+                                        <p className="text-emerald-800 text-xs font-medium flex items-center gap-1">
+                                            <CheckCircle className="w-3.5 h-3.5" />
+                                            Linked to employee: {permEmployee.first_name} {permEmployee.last_name}
+                                        </p>
+                                        <p className="text-emerald-600 text-xs mt-1">
+                                            {permEmployee.job_title} — {permEmployee.department}
+                                        </p>
+                                    </div>
+                                )}
 
-                            {/* Permissions list */}
-                            <div className="p-6 space-y-2">
-                                {ALL_PERMISSIONS.map(p => {
-                                    const Icon = p.icon
-                                    const isGranted = tempPermissions.includes(p.key)
-                                    return (
-                                        <label
-                                            key={p.key}
-                                            className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition ${
-                                                isGranted
-                                                    ? 'border-emerald-300 bg-emerald-50'
-                                                    : 'border-gray-200 hover:bg-gray-50'
-                                            } ${permEmployee === null ? 'opacity-40 pointer-events-none' : ''}`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-md flex items-center justify-center ${
-                                                    isGranted ? 'bg-emerald-100' : 'bg-gray-100'
-                                                }`}>
-                                                    <Icon className={`w-4 h-4 ${isGranted ? 'text-emerald-700' : 'text-gray-500'}`} />
+                                {/* Permissions list */}
+                                <div className="space-y-3">
+                                    {ALL_PERMISSIONS.map(p => {
+                                        const Icon = p.icon
+                                        const isGranted = tempPermissions.includes(p.key)
+                                        return (
+                                            <label
+                                                key={p.key}
+                                                className={`flex items-center justify-between p-3 border rounded-[5px] cursor-pointer transition ${
+                                                    isGranted
+                                                        ? 'border-emerald-300 bg-emerald-50'
+                                                        : 'border-gray-200 hover:bg-gray-50'
+                                                } ${permEmployee === null ? 'opacity-40 pointer-events-none' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-8 h-8 rounded-[5px] flex items-center justify-center ${
+                                                        isGranted ? 'bg-emerald-100' : 'bg-gray-100'
+                                                    }`}>
+                                                        <Icon className={`w-4 h-4 ${isGranted ? 'text-emerald-700' : 'text-gray-500'}`} />
+                                                    </div>
+                                                    <div>
+                                                        <p className={`text-sm font-medium ${isGranted ? 'text-emerald-800' : 'text-gray-700'}`}>
+                                                            {p.label}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">{p.desc}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className={`text-sm font-medium ${isGranted ? 'text-emerald-800' : 'text-gray-700'}`}>
-                                                        {p.label}
-                                                    </p>
-                                                    <p className="text-xs text-gray-400">{p.desc}</p>
-                                                </div>
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                checked={isGranted}
-                                                onChange={() => togglePermission(p.key)}
-                                                className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                            />
-                                        </label>
-                                    )
-                                })}
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isGranted}
+                                                    onChange={() => togglePermission(p.key)}
+                                                    className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                />
+                                            </label>
+                                        )
+                                    })}
+                                </div>
+
+                                {/* Summary */}
+                                {tempPermissions.length > 0 && permEmployee && (
+                                    <div className="mt-5 bg-emerald-50 rounded-[5px] p-3 border border-emerald-200">
+                                        <p className="text-xs text-emerald-700 font-medium flex items-center gap-1">
+                                            <CheckCircle className="w-3.5 h-3.5" />
+                                            {tempPermissions.length} module{tempPermissions.length > 1 ? 's' : ''} granted:
+                                            {' '}{tempPermissions.map(p =>
+                                                ALL_PERMISSIONS.find(x => x.key === p)?.label
+                                            ).join(', ')}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Summary */}
-                            {tempPermissions.length > 0 && (
-                                <div className="mx-6 mb-4 bg-emerald-50 rounded-md p-3 border border-emerald-200">
-                                    <p className="text-xs text-emerald-700 font-medium flex items-center gap-1">
-                                        <CheckCircle className="w-3.5 h-3.5" />
-                                        {tempPermissions.length} module{tempPermissions.length > 1 ? 's' : ''} granted:
-                                        {' '}{tempPermissions.map(p =>
-                                            ALL_PERMISSIONS.find(x => x.key === p)?.label
-                                        ).join(', ')}
-                                    </p>
-                                </div>
-                            )}
-
-                            <div className="flex gap-3 p-6 pt-0">
+                            <div className="flex gap-3 p-6 pt-2 border-t border-gray-200">
                                 <button
                                     onClick={savePermissions}
                                     disabled={permEmployee === null}
-                                    className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 rounded-md text-sm transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-[5px] text-sm transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     Save Permissions
                                 </button>
                                 <button
-                                    onClick={() => setShowPermModal(false)}
-                                    className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition"
+                                    onClick={() => setShowPermDrawer(false)}
+                                    className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-[5px] text-sm hover:bg-gray-50 transition-all duration-200"
                                 >
                                     Cancel
                                 </button>
@@ -569,6 +586,20 @@ export default function UserManagement() {
                     </div>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes slide-in-right {
+                    from {
+                        transform: translateX(100%);
+                    }
+                    to {
+                        transform: translateX(0);
+                    }
+                }
+                .animate-slide-in-right {
+                    animation: slide-in-right 0.3s ease-out;
+                }
+            `}</style>
         </div>
     )
 }

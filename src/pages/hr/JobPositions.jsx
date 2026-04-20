@@ -23,7 +23,7 @@ export default function JobPositions() {
     const [jobs, setJobs]           = useState([])
     const [search, setSearch]       = useState('')
     const [loading, setLoading]     = useState(true)
-    const [showModal, setShowModal] = useState(false)
+    const [showDrawer, setShowDrawer] = useState(false)
     const [editing, setEditing]     = useState(null)
     const [error, setError]         = useState('')
     const [form, setForm]           = useState({
@@ -45,7 +45,7 @@ export default function JobPositions() {
         setEditing(null)
         setForm({ title: '', department: '', description: '', requirements: '', type: 'full_time', status: 'open', salary_min: '', salary_max: '', deadline: '' })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const openEdit = (j) => {
@@ -58,7 +58,7 @@ export default function JobPositions() {
             deadline: j.deadline ?? '',
         })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const handleSubmit = async (e) => {
@@ -70,7 +70,7 @@ export default function JobPositions() {
             } else {
                 await hrApi.createJobPosition(form)
             }
-            setShowModal(false)
+            setShowDrawer(false)
             fetchJobs()
         } catch (err) {
             setError(err.response?.data?.message ?? 'Something went wrong')
@@ -122,7 +122,7 @@ export default function JobPositions() {
                     </div>
                     <button
                         onClick={openCreate}
-                        className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-8 py-3 rounded-md transition-all duration-200 flex items-center gap-2 shadow-md"
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-8 py-3 rounded-[5px] transition-all duration-200 flex items-center gap-2 shadow-md"
                     >
                         <PlusCircle className="w-5 h-5" />
                         Post Job
@@ -138,7 +138,7 @@ export default function JobPositions() {
                             placeholder="Search by title or department..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            className="w-full pl-9 pr-4 py-2.5 bg-white/80 backdrop-blur-md border border-gray-200 rounded-[5px] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         />
                     </div>
                 </div>
@@ -157,7 +157,7 @@ export default function JobPositions() {
                             <p className="text-gray-400 text-xs mt-1">Click "Post Job" to get started</p>
                         </div>
                     ) : jobs.map((j) => (
-                        <div key={j.id} className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg p-5 hover:shadow-xl transition-all duration-200">
+                        <div key={j.id} className="bg-white/80 backdrop-blur-md rounded-[5px] border border-gray-200 shadow-lg p-5 hover:shadow-xl transition-all duration-200">
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
@@ -170,7 +170,7 @@ export default function JobPositions() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 ${
+                                    <span className={`text-xs px-2 py-1 rounded-[5px] font-medium flex items-center gap-1 ${
                                         j.status === 'open' 
                                             ? 'bg-green-100 text-green-700' 
                                             : 'bg-gray-100 text-gray-600'
@@ -187,8 +187,7 @@ export default function JobPositions() {
                                 </div>
                                 {j.salary_min && (
                                     <div className="flex items-center gap-1">
-                                        <DollarSign className="w-3 h-3" />
-                                        <span>${Number(j.salary_min).toLocaleString()} - ${Number(j.salary_max).toLocaleString()}</span>
+                                        <span>{Number(j.salary_min).toLocaleString()} - {Number(j.salary_max).toLocaleString()} Frw</span>
                                     </div>
                                 )}
                                 {j.deadline && (
@@ -207,14 +206,14 @@ export default function JobPositions() {
                             <div className="flex gap-2">
                                 <button 
                                     onClick={() => openEdit(j)} 
-                                    className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition text-xs flex items-center gap-1"
+                                    className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-[5px] transition text-xs flex items-center gap-1"
                                 >
                                     <Edit className="w-3.5 h-3.5" />
                                     Edit
                                 </button>
                                 <button 
                                     onClick={() => handleDelete(j.id)} 
-                                    className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition text-xs flex items-center gap-1"
+                                    className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-[5px] transition text-xs flex items-center gap-1"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
                                     Delete
@@ -224,32 +223,43 @@ export default function JobPositions() {
                     ))}
                 </div>
 
-                {/* Add/Edit Job Modal */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
-                        <div className="bg-white/95 backdrop-blur-md rounded-md shadow-xl w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
-                            <div className="flex justify-between items-center px-8 py-5 border-b border-gray-200 sticky top-0 bg-white/95 backdrop-blur-md z-10">
-                                <h3 className="text-xl font-bold text-black">
-                                    {editing ? 'Edit Job Position' : 'Post New Job'}
+                {/* ===== RIGHT SIDE DRAWER - ADD/EDIT JOB ===== */}
+                {showDrawer && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="fixed inset-0 bg-black/40" onClick={() => setShowDrawer(false)} />
+                        <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
+                                <h3 className="font-bold text-gray-800 text-xl flex items-center gap-2">
+                                    {editing ? (
+                                        <>
+                                            <Edit className="w-6 h-6 text-emerald-600" />
+                                            Edit Job Position
+                                        </>
+                                    ) : (
+                                        <>
+                                            <PlusCircle className="w-6 h-6 text-emerald-600" />
+                                            Post New Job
+                                        </>
+                                    )}
                                 </h3>
-                                <button 
-                                    onClick={() => setShowModal(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100 transition"
+                                <button
+                                    onClick={() => setShowDrawer(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-[5px] hover:bg-gray-100 text-gray-500 transition-all"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            
-                            {error && (
-                                <div className="mx-8 mt-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-md flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4" />
-                                    {error}
-                                </div>
-                            )}
-                            
-                            <form onSubmit={handleSubmit} className="p-8 space-y-5">
-                                <div className="grid grid-cols-2 gap-5">
-                                    <div className="col-span-2">
+
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
+                                {error && (
+                                    <div className="mb-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-[5px] flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {error}
+                                    </div>
+                                )}
+                                
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <Tag className="w-3.5 h-3.5 inline mr-1" />
                                             Job Title
@@ -258,9 +268,10 @@ export default function JobPositions() {
                                             type="text" required value={form.title} 
                                             onChange={e => setForm({...form, title: e.target.value})}
                                             placeholder="e.g. Senior Software Engineer"
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
                                         />
                                     </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <Building2 className="w-3.5 h-3.5 inline mr-1" />
@@ -270,62 +281,67 @@ export default function JobPositions() {
                                             type="text" required value={form.department} 
                                             onChange={e => setForm({...form, department: e.target.value})}
                                             placeholder="e.g. Engineering"
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Employment Type
-                                        </label>
-                                        <select 
-                                            value={form.type} 
-                                            onChange={e => setForm({...form, type: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
-                                        >
-                                            <option value="full_time">Full Time</option>
-                                            <option value="part_time">Part Time</option>
-                                            <option value="contract">Contract</option>
-                                            <option value="internship">Internship</option>
-                                        </select>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Employment Type
+                                            </label>
+                                            <select 
+                                                value={form.type} 
+                                                onChange={e => setForm({...form, type: e.target.value})}
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            >
+                                                <option value="full_time">Full Time</option>
+                                                <option value="part_time">Part Time</option>
+                                                <option value="contract">Contract</option>
+                                                <option value="internship">Internship</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Status
+                                            </label>
+                                            <select 
+                                                value={form.status} 
+                                                onChange={e => setForm({...form, status: e.target.value})}
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
+                                            >
+                                                <option value="open">Open</option>
+                                                <option value="closed">Closed</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Status
-                                        </label>
-                                        <select 
-                                            value={form.status} 
-                                            onChange={e => setForm({...form, status: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50"
-                                        >
-                                            <option value="open">Open</option>
-                                            <option value="closed">Closed</option>
-                                        </select>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Min Salary (Frw)
+                                            </label>
+                                            <input 
+                                                type="number" min="0" value={form.salary_min} 
+                                                onChange={e => setForm({...form, salary_min: e.target.value})}
+                                                placeholder="0"
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Max Salary (Frw)
+                                            </label>
+                                            <input 
+                                                type="number" min="0" value={form.salary_max} 
+                                                onChange={e => setForm({...form, salary_max: e.target.value})}
+                                                placeholder="0"
+                                                className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            />
+                                        </div>
                                     </div>
+
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            <DollarSign className="w-3.5 h-3.5 inline mr-1" />
-                                            Min Salary
-                                        </label>
-                                        <input 
-                                            type="number" min="0" value={form.salary_min} 
-                                            onChange={e => setForm({...form, salary_min: e.target.value})}
-                                            placeholder="0"
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            <DollarSign className="w-3.5 h-3.5 inline mr-1" />
-                                            Max Salary
-                                        </label>
-                                        <input 
-                                            type="number" min="0" value={form.salary_max} 
-                                            onChange={e => setForm({...form, salary_max: e.target.value})}
-                                            placeholder="0"
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
-                                        />
-                                    </div>
-                                    <div className="col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <Calendar className="w-3.5 h-3.5 inline mr-1" />
                                             Application Deadline
@@ -333,50 +349,64 @@ export default function JobPositions() {
                                         <input 
                                             type="date" value={form.deadline} 
                                             onChange={e => setForm({...form, deadline: e.target.value})}
-                                            className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
                                         />
                                     </div>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <FileText className="w-3.5 h-3.5 inline mr-1" />
-                                        Description
-                                    </label>
-                                    <textarea 
-                                        rows="3" value={form.description} 
-                                        onChange={e => setForm({...form, description: e.target.value})}
-                                        placeholder="Job description, responsibilities, etc."
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        <ListChecks className="w-3.5 h-3.5 inline mr-1" />
-                                        Requirements
-                                    </label>
-                                    <textarea 
-                                        rows="3" value={form.requirements} 
-                                        onChange={e => setForm({...form, requirements: e.target.value})}
-                                        placeholder="Required skills, experience, qualifications..."
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
-                                    />
-                                </div>
-                                
-                                <div className="flex gap-3 pt-4">
-                                    <button type="submit" className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 rounded-md text-sm transition">
-                                        {editing ? 'Update Job' : 'Post Job'}
-                                    </button>
-                                    <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <FileText className="w-3.5 h-3.5 inline mr-1" />
+                                            Description
+                                        </label>
+                                        <textarea 
+                                            rows="3" value={form.description} 
+                                            onChange={e => setForm({...form, description: e.target.value})}
+                                            placeholder="Job description, responsibilities, etc."
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <ListChecks className="w-3.5 h-3.5 inline mr-1" />
+                                            Requirements
+                                        </label>
+                                        <textarea 
+                                            rows="3" value={form.requirements} 
+                                            onChange={e => setForm({...form, requirements: e.target.value})}
+                                            placeholder="Required skills, experience, qualifications..."
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex gap-3 pt-4 pb-6">
+                                        <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-[5px] text-sm transition-all duration-200 shadow-md hover:shadow-lg">
+                                            {editing ? 'Update Job' : 'Post Job'}
+                                        </button>
+                                        <button type="button" onClick={() => setShowDrawer(false)} className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-[5px] text-sm hover:bg-gray-50 transition-all duration-200">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes slide-in-right {
+                    from {
+                        transform: translateX(100%);
+                    }
+                    to {
+                        transform: translateX(0);
+                    }
+                }
+                .animate-slide-in-right {
+                    animation: slide-in-right 0.3s ease-out;
+                }
+            `}</style>
         </div>
     )
 }

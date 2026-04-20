@@ -162,7 +162,7 @@ export default function Login() {
                         <div className="mt-6 text-center">
                             <Link 
                                 to="/" 
-                                className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-emerald-600 transition duration-200"
+                                className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-600 transition duration-200"
                             >
                                 <ShoppingBag className="w-3 h-3" />
                                 ← Back to Shop

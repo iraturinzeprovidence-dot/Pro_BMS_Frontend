@@ -13,7 +13,7 @@ import {
 
 export default function Categories() {
     const [categories, setCategories] = useState([])
-    const [showModal, setShowModal]   = useState(false)
+    const [showDrawer, setShowDrawer] = useState(false)
     const [editing, setEditing]       = useState(null)
     const [error, setError]           = useState('')
     const [form, setForm]             = useState({ name: '', description: '' })
@@ -29,14 +29,14 @@ export default function Categories() {
         setEditing(null)
         setForm({ name: '', description: '' })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const openEdit = (category) => {
         setEditing(category)
         setForm({ name: category.name, description: category.description ?? '' })
         setError('')
-        setShowModal(true)
+        setShowDrawer(true)
     }
 
     const handleSubmit = async (e) => {
@@ -48,7 +48,7 @@ export default function Categories() {
             } else {
                 await inventoryApi.createCategory(form)
             }
-            setShowModal(false)
+            setShowDrawer(false)
             fetchCategories()
         } catch (err) {
             setError(err.response?.data?.message ?? 'Something went wrong')
@@ -90,7 +90,7 @@ export default function Categories() {
                     </div>
                     <button
                         onClick={openCreate}
-                        className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-8 py-3 rounded-md transition-all duration-200 flex items-center gap-2 shadow-md"
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium px-8 py-3 rounded-[5px] transition-all duration-200 flex items-center gap-2 shadow-md"
                     >
                         <PlusCircle className="w-5 h-5" />
                         Add Category
@@ -100,7 +100,7 @@ export default function Categories() {
                 {/* Categories Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {categories.map((c) => (
-                        <div key={c.id} className="bg-white/80 backdrop-blur-md rounded-md border border-gray-200 shadow-lg p-5 hover:shadow-xl transition-all duration-200">
+                        <div key={c.id} className="bg-white/80 backdrop-blur-md rounded-[5px] border border-gray-200 shadow-lg p-5 hover:shadow-xl transition-all duration-200">
                             <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
@@ -120,14 +120,14 @@ export default function Categories() {
                                 <div className="flex gap-1 ml-4">
                                     <button 
                                         onClick={() => openEdit(c)} 
-                                        className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition"
+                                        className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-[5px] transition"
                                         title="Edit"
                                     >
                                         <Edit className="w-4 h-4" />
                                     </button>
                                     <button 
                                         onClick={() => handleDelete(c.id)} 
-                                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-[5px] transition"
                                         title="Delete"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -146,75 +146,106 @@ export default function Categories() {
                     )}
                 </div>
 
-                {/* Modal - Add/Edit Category */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
-                        <div className="bg-white/95 backdrop-blur-md rounded-md shadow-xl w-full max-w-md mx-auto">
-                            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-black">
-                                    {editing ? 'Edit Category' : 'Add New Category'}
+                {/* Right Side Drawer - Add/Edit Category */}
+                {showDrawer && (
+                    <div className="fixed inset-0 z-50 flex justify-end">
+                        <div className="fixed inset-0 bg-black/40" onClick={() => setShowDrawer(false)} />
+                        <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
+                                <h3 className="font-bold text-gray-800 text-xl flex items-center gap-2">
+                                    {editing ? (
+                                        <>
+                                            <Edit className="w-6 h-6 text-emerald-600" />
+                                            Edit Category
+                                        </>
+                                    ) : (
+                                        <>
+                                            <PlusCircle className="w-6 h-6 text-emerald-600" />
+                                            Add New Category
+                                        </>
+                                    )}
                                 </h3>
-                                <button 
-                                    onClick={() => setShowModal(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100 transition"
+                                <button
+                                    onClick={() => setShowDrawer(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-[5px] hover:bg-gray-100 text-gray-500 transition-all"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            
-                            {error && (
-                                <div className="mx-6 mt-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-md flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4" />
-                                    {error}
-                                </div>
-                            )}
-                            
-                            <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Category Name
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        required 
-                                        value={form.name} 
-                                        onChange={e => setForm({...form, name: e.target.value})}
-                                        placeholder="e.g. Electronics, Clothing, Books"
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Description
-                                    </label>
-                                    <textarea 
-                                        rows="3" 
-                                        value={form.description} 
-                                        onChange={e => setForm({...form, description: e.target.value})}
-                                        placeholder="Optional description for this category..."
-                                        className="w-full border border-gray-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
-                                    />
-                                </div>
-                                <div className="flex gap-3 pt-4">
-                                    <button 
-                                        type="submit" 
-                                        className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 rounded-md text-sm transition"
-                                    >
-                                        {editing ? 'Update Category' : 'Create Category'}
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setShowModal(false)}
-                                        className="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-md text-sm hover:bg-gray-50 transition"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
+
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
+                                {error && (
+                                    <div className="mb-5 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-[5px] flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {error}
+                                    </div>
+                                )}
+                                
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Tag className="w-3.5 h-3.5 inline mr-1" />
+                                            Category Name
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            value={form.name} 
+                                            onChange={e => setForm({...form, name: e.target.value})}
+                                            placeholder="e.g. Electronics, Clothing, Books"
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <Package className="w-3.5 h-3.5 inline mr-1" />
+                                            Description
+                                        </label>
+                                        <textarea 
+                                            rows="4" 
+                                            value={form.description} 
+                                            onChange={e => setForm({...form, description: e.target.value})}
+                                            placeholder="Optional description for this category..."
+                                            className="w-full border border-gray-200 rounded-[5px] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/50" 
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4 pb-6">
+                                        <button 
+                                            type="submit" 
+                                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-[5px] text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+                                        >
+                                            {editing ? 'Update Category' : 'Create Category'}
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowDrawer(false)}
+                                            className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-[5px] text-sm hover:bg-gray-50 transition-all duration-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes slide-in-right {
+                    from {
+                        transform: translateX(100%);
+                    }
+                    to {
+                        transform: translateX(0);
+                    }
+                }
+                .animate-slide-in-right {
+                    animation: slide-in-right 0.3s ease-out;
+                }
+            `}</style>
         </div>
     )
 }
